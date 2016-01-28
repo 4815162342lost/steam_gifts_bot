@@ -7,6 +7,9 @@ import os
 import json
 import notify2
 from gi.repository.GdkPixbuf import Pixbuf
+import sys
+from subprocess import call
+import datetime
 
 def get_cookies():
 	"""read cookies from files"""
@@ -22,6 +25,7 @@ def what_search_func():
 
 def get_requests(cookie, req_type):
 	"""get first page"""
+	global chose
 	if req_type=="wishlist":
 		print("work with wishlist")
 		page_number=1
@@ -97,13 +101,16 @@ def get_game_links(requests_result):
 
 def enter_geaway(geaway_link):
 	"""enter to geaways"""
+	global i_want_to_sleep
+	global chose
 	try:
 		r=requests.get(geaway_link, cookies=cookie, headers=headers)
+		print(r.status_code)
 	except:
 		print("Site not avaliable...")
 		chose=0
 		time.sleep(300)
-		return 0
+		return True
 	soup_enter=BeautifulSoup(r.text)
 	game=soup_enter.title.string
 	link=soup_enter.find(class_="sidebar sidebar--wide").form
@@ -116,8 +123,9 @@ def enter_geaway(geaway_link):
 			print("Site not avaliable...")
 			chose=0
 			time.sleep(300)	
-			return 0
+			return True
 		extract_coins=json.loads(r.text)
+		print(r.text)
 		if extract_coins["type"]=="success":
 			coins=get_coins(get_requests(cookie, "coins_check"))
 			print("Game: "+game+". Coins: "+coins)
@@ -128,11 +136,15 @@ def enter_geaway(geaway_link):
 			coins=get_coins(get_requests(cookie, "coins_check"))
 			chose=0
 			i_want_to_sleep=True
+			print("Недостаточно монет...", r.text, geaway_link)
 			return True
 		else:
 			print(extract_coins)
+			return False
 	else:
 		chose=0
+		print("Недостаточно монет... Я тут!", geaway_link)
+		i_want_to_sleep=True
 		return True
 
 def get_entered_links(requests_result):
@@ -154,10 +166,10 @@ def get_coins(requests_result):
 
 def get_next_page(requests):
 	"""Next page exists?"""
-	if requests.text.find("Next")!="-1":
-		return False
-	else:
+	if requests.text.find("Next")!=-1:
 		return True
+	else:
+		return False
 		
 def set_notify(head, text):
 	notify2.init('Steam_gifts_bot')
@@ -166,12 +178,20 @@ def set_notify(head, text):
 	n.set_icon_from_pixbuf(pb)
 	n.show()
 
+os.chdir("/home/vodka/scripts/python/steam_gifts/")
 print("I am started...")
 pb=Pixbuf.new_from_file("./icon.png")
 chose=0
 random.seed(os.urandom)
 headers = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0'}
 cookie=get_cookies()
+try:
+	r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+except:
+	set_notify("Куки устарели...", "Необходимо обновить куки")
+	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<21:
+		call(["beep", "-l 2000",  "-f 1900", "-r 3"])
+	sys.exit(1)
 what_search=what_search_func()
 coins=get_coins(get_requests(cookie, "coins_check"))
 entered_url=get_requests(cookie, "enteredlist")
@@ -188,7 +208,7 @@ while True:
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Монет осталось мало...", "А точнее: "+coins+". Глубокий сон на "+str(sleep_time//60)+" мин.")
-		print("Монет осталось мало: "+ str(coins))
+		print("Монет осталось мало: "+ str(coins)+". Я спать на "+str(sleep_time//60)+" мин.")
 		time.sleep(sleep_time)
 		chose=0
 	if chose==3:

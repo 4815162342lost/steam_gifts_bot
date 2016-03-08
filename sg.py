@@ -183,11 +183,11 @@ def set_notify(head, text):
 def work_with_win_file(need_write, count):
 	"""Function for read drom file or write to file won.txt"""
 	with open('./won.txt', 'r+') as read_from_file:
-		if need_write:
+		if not need_write:
 			count=read_from_file.read()
 			read_from_file.close()
 			return count
-		elif not need_write:
+		elif need_write:
 			read_from_file.seek(0)
 			read_from_file.write(str(count))
 			read_from_file.close()

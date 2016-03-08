@@ -30,7 +30,7 @@ def get_requests(cookie, req_type):
 		print("work with wishlist")
 		page_number=1
 		need_next=True
-		while need_next==True:
+		while need_next:
 			try:
 				r=requests.get("http://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&type=wishlist", cookies=cookie, headers=headers)
 			except:
@@ -44,9 +44,10 @@ def get_requests(cookie, req_type):
 	elif req_type=="search":
 		print("work with search list")
 		for current_search in what_search.values():
+			print("Search giveaways with "+str(current_search))
 			page_number=1
 			need_next=True
-			while need_next==True:
+			while need_next:
 				try:
 					r=requests.get("http://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&q="+str(current_search), cookies=cookie, headers=headers)
 					get_game_links(r)
@@ -97,7 +98,7 @@ def get_game_links(requests_result):
 			print(geaway_link)
 			entered_url.append(geaway_link)
 			geaway_link="http://www.steamgifts.com/" + geaway_link
-			if enter_geaway(geaway_link)==True:
+			if enter_geaway(geaway_link):
 				break
 
 def enter_geaway(geaway_link):
@@ -182,11 +183,11 @@ def set_notify(head, text):
 def work_with_win_file(need_write, count):
 	"""Function for read drom file or write to file won.txt"""
 	with open('./won.txt', 'r+') as read_from_file:
-		if need_write==False:
+		if need_write:
 			count=read_from_file.read()
 			read_from_file.close()
 			return count
-		elif need_write==True:
+		elif not need_write:
 			read_from_file.seek(0)
 			read_from_file.write(str(count))
 			read_from_file.close()
@@ -197,7 +198,9 @@ def check_won(count):
 		r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 		soup=BeautifulSoup(r.text).find(class_="nav__notification").string
 	except:
-		print ("Site not avaliable...")
+		print ("You not win giveaways...")
+		work_with_win_file(True, 0)
+		return 0
 	if int(count)<int(soup):
 		if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22:
 			os.system("./win.sh")
@@ -236,7 +239,7 @@ while True:
 	i_want_to_sleep=False
 	requests_result=get_requests(cookie, func_list[chose])
 	chose+=1
-	if i_want_to_sleep==True:
+	if i_want_to_sleep:
 		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))

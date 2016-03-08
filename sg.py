@@ -56,7 +56,8 @@ def get_requests(cookie, req_type):
 					print("Site not avaliable")
 					chose=0
 					time.sleep(300)	
-					break		
+					break
+			time.sleep(random.randint(14,93))
 	elif req_type=="enteredlist":
 		print("get entered list")
 		entered_list=[]
@@ -178,24 +179,55 @@ def set_notify(head, text):
 	n.set_icon_from_pixbuf(pb)
 	n.show()
 
+def work_with_win_file(need_write, count):
+	"""Function for read drom file or write to file won.txt"""
+	with open('./won.txt', 'r+') as read_from_file:
+		if need_write==False:
+			count=read_from_file.read()
+			read_from_file.close()
+			return count
+		elif need_write==True:
+			read_from_file.seek(0)
+			read_from_file.write(str(count))
+			read_from_file.close()
+
+def check_won(count):
+	"""Check new won giveaway"""
+	try:
+		r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+		soup=BeautifulSoup(r.text).find(class_="nav__notification").string
+	except:
+		print ("Site not avaliable...")
+	if int(count)<int(soup):
+		if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22:
+			os.system("./win.sh")
+		set_notify("Бот выиграл в раздаче!", "Заберите свой приз на сайте.")
+		work_with_win_file(True, soup)
+		return soup
+	elif int(count)>int(soup):
+		work_with_win_file(True, soup)
+		return soup
+	return count
+
 os.chdir("/home/vodka/scripts/python/steam_gifts/")
 print("I am started...")
 pb=Pixbuf.new_from_file("./icon.png")
 chose=0
 random.seed(os.urandom)
-headers = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0'}
+headers = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'}
 cookie=get_cookies()
 try:
 	r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 except:
 	set_notify("Куки устарели...", "Необходимо обновить куки")
-	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<21:
+	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22:
 		call(["beep", "-l 2000",  "-f 1900", "-r 3"])
 	sys.exit(1)
 what_search=what_search_func()
 coins=get_coins(get_requests(cookie, "coins_check"))
 entered_url=get_requests(cookie, "enteredlist")
 func_list=("wishlist", "search", "someone")
+won_count=work_with_win_file(False, 0)
 set_notify("Бот начал свою работу", "Монет всего: " + str(coins))
 
 i_want_to_sleep=False
@@ -205,6 +237,7 @@ while True:
 	requests_result=get_requests(cookie, func_list[chose])
 	chose+=1
 	if i_want_to_sleep==True:
+		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Монет осталось мало...", "А точнее: "+coins+". Глубокий сон на "+str(sleep_time//60)+" мин.")
@@ -212,6 +245,7 @@ while True:
 		time.sleep(sleep_time)
 		chose=0
 	if chose==3:
+		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Я вступил во все раздачи...", "И ухожу в сон на "+str(sleep_time//60)+" мин.")

@@ -5,22 +5,28 @@ import random
 from bs4 import BeautifulSoup
 import os
 import json
-import notify2
-from gi.repository.GdkPixbuf import Pixbuf
+import platform
+os.chdir("/home/vodka/scripts/python/steam_gifts/")
+if platform.system()=="Linux":
+	import notify2
+	from gi.repository.GdkPixbuf import Pixbuf
+	pb=Pixbuf.new_from_file("icon.png")
 import sys
 from subprocess import call
 import datetime
+if platform.system()=="Windows":
+	os.system("Chcp 65001")
 
 def get_cookies():
 	"""read cookies from files"""
 	cookie={}
-	exec(open("./cookie.txt").read(), None, cookie)
+	exec(open("cookie.txt").read(), None, cookie)
 	return cookie
 	
 def what_search_func():
 	"""read search list from file"""
 	what_search={}
-	exec(open("./search.txt").read(), None, what_search)
+	exec(open("search.txt").read(), None, what_search)
 	return what_search
 
 def get_requests(cookie, req_type):
@@ -114,7 +120,11 @@ def enter_geaway(geaway_link):
 		time.sleep(300)
 		return True
 	soup_enter=BeautifulSoup(r.text)
-	game=soup_enter.title.string
+	try:
+		game=soup_enter.title.string
+	except:
+		print("No name")
+		game="Unknown game"
 	link=soup_enter.find(class_="sidebar sidebar--wide").form
 	if link!=None:
 		link=link.find_all("input")
@@ -138,16 +148,30 @@ def enter_geaway(geaway_link):
 			coins=get_coins(get_requests(cookie, "coins_check"))
 			chose=0
 			i_want_to_sleep=True
-			print("Недостаточно монет...", r.text, geaway_link)
+			print("Недостаточно монет...", geaway_link)
 			return True
-		else:
-			print(extract_coins)
-			return False
 	else:
-		chose=0
-		print("Недостаточно монет... Я тут!", geaway_link)
-		i_want_to_sleep=True
-		return True
+		link=soup_enter.find(class_="sidebar__error is-disabled")
+		if link!=None and link.get_text()==" Not Enough Points":
+			print("Недостаточно монет для вступления в раздачу...", geaway_link)
+			time.sleep(random.randint(5,60))
+			if int(get_coins(get_requests(cookie, "coins_check")))<10:
+				chose=0
+				i_want_to_sleep=True
+				return True
+		else:
+			link=soup_enter.select("div.featured__column span")
+			if link!=None:
+				print ("Раздача уже закончилась, бот не упел в неё вступить ", geaway_link)
+				print ("Она закончилась ", link[0].text)
+				time.sleep(random.randint(5,60))
+				return False
+			else:
+				print ("Критическая ошибка!")
+				do_beep("critical")
+				print (link)
+				return False
+		return False
 
 def get_entered_links(requests_result):
 	entered_list=[]
@@ -174,6 +198,8 @@ def get_next_page(requests):
 		return False
 		
 def set_notify(head, text):
+	if platform.system()!="Linux":
+		return 0
 	notify2.init('Steam_gifts_bot')
 	n = notify2.Notification(head, text)
 	n.set_timeout(15000)
@@ -182,7 +208,7 @@ def set_notify(head, text):
 
 def work_with_win_file(need_write, count):
 	"""Function for read drom file or write to file won.txt"""
-	with open('./won.txt', 'r+') as read_from_file:
+	with open('won.txt', 'r+') as read_from_file:
 		if not need_write:
 			count=read_from_file.read()
 			read_from_file.close()
@@ -202,8 +228,7 @@ def check_won(count):
 		work_with_win_file(True, 0)
 		return 0
 	if int(count)<int(soup):
-		if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22:
-			os.system("./win.sh")
+		do_beep("won")
 		set_notify("Бот выиграл в раздаче!", "Заберите свой приз на сайте.")
 		work_with_win_file(True, soup)
 		return soup
@@ -212,19 +237,25 @@ def check_won(count):
 		return soup
 	return count
 
-os.chdir("/home/vodka/scripts/python/steam_gifts/")
+def do_beep(reason):
+	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22 and platform.system()=="Linux":
+		if reason=="coockie_exept":
+			call(["beep", "-l 2000",  "-f 1900", "-r 3"])
+		elif reason=="critical":
+			call(["beep", "-l 1000", "-r 10", "-f 1900" ])
+		elif reason=="won":
+			os.system("./win.sh")
+
 print("I am started...")
-pb=Pixbuf.new_from_file("./icon.png")
 chose=0
 random.seed(os.urandom)
-headers = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:44.0) Gecko/20100101 Firefox/44.0'}
+headers = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0'}
 cookie=get_cookies()
 try:
 	r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 except:
 	set_notify("Куки устарели...", "Необходимо обновить куки")
-	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22:
-		call(["beep", "-l 2000",  "-f 1900", "-r 3"])
+	do_beep("coockie_exept")
 	sys.exit(1)
 what_search=what_search_func()
 coins=get_coins(get_requests(cookie, "coins_check"))

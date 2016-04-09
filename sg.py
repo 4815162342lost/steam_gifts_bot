@@ -17,17 +17,33 @@ import datetime
 if platform.system()=="Windows":
 	os.system("Chcp 65001")
 
-def get_cookies():
+def get_from_file(file_name):
 	"""read cookies from files"""
-	cookie={}
-	exec(open("cookie.txt").read(), None, cookie)
-	return cookie
-	
-def what_search_func():
-	"""read search list from file"""
-	what_search={}
-	exec(open("search.txt").read(), None, what_search)
-	return what_search
+	result={}
+	exec(open(file_name).read(), None, result)
+	return result
+
+def get_user_agent():
+	"""read user agent from user_agent.txt"""
+	with open("user_agent.txt") as user_agent_from_file:
+		user_agent=user_agent_from_file.readline()
+		return user_agent
+
+def get_func_list():
+	"""what giveaways entered"""
+	global sc_need
+	global need_giveaways_from_banners
+	if settings_list["wishlist"]:
+		func_list.append("wishlist")
+	if settings_list["search_list"]:
+		func_list.append("search")
+	if settings_list["random_list"]:
+		func_list.append("someone")
+	if settings_list["steam_companion_bot"]:
+		sc_need=1
+	if settings_list["giveaways_from_banners"]:
+		need_giveaways_from_banners=1
+
 
 def get_requests(cookie, req_type):
 	"""get first page"""
@@ -101,6 +117,8 @@ def get_game_links(requests_result):
 	for get_link in link:
 		geaway_link=get_link.get("href")
 		if not geaway_link in entered_url:
+			if not need_giveaways_from_banners and geaway_link in giveaways_from_banner:
+				continue
 			print(geaway_link)
 			entered_url.append(geaway_link)
 			geaway_link="http://www.steamgifts.com/" + geaway_link
@@ -120,6 +138,18 @@ def enter_geaway(geaway_link):
 		time.sleep(300)
 		return True
 	soup_enter=BeautifulSoup(r.text)
+	for word in forbidden_words:
+		if r.text.lower().find(word)!=-1:
+			for word1 in good_words:
+				if r.text.lower().find(word1)!=-1:
+					print("Ложная тревога")
+					break
+				else:
+					print("It is a trap! Be carefull! Bad people want destroy my scripts.")
+					do_beep("bad_words")
+					with open("bad_giveaways.txt","a") as bad_giveaways:
+						bad_giveaways.write(geaway_link+"\n")
+					return False
 	try:
 		game=soup_enter.title.string
 	except:
@@ -174,6 +204,7 @@ def enter_geaway(geaway_link):
 		return False
 
 def get_entered_links(requests_result):
+	"""Entered giveaway list. ignore it"""
 	entered_list=[]
 	soup=BeautifulSoup(requests_result.text)
 	links=soup.find_all(class_="table__row-inner-wrap")
@@ -198,6 +229,7 @@ def get_next_page(requests):
 		return False
 		
 def set_notify(head, text):
+	"""Set notify. Only on Linux"""
 	if platform.system()!="Linux":
 		return 0
 	notify2.init('Steam_gifts_bot')
@@ -238,6 +270,7 @@ def check_won(count):
 	return count
 
 def do_beep(reason):
+	"""do beep with PC speacker. Work only on Linux and requrement motherboard speaker"""
 	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22 and platform.system()=="Linux":
 		if reason=="coockie_exept":
 			call(["beep", "-l 2000",  "-f 1900", "-r 3"])
@@ -245,26 +278,63 @@ def do_beep(reason):
 			call(["beep", "-l 1000", "-r 10", "-f 1900" ])
 		elif reason=="won":
 			os.system("./win.sh")
+		elif reason=="bad_words":
+			call(["beep", "-l 300", "-r 30", "-f 1900" ])
+
+def steam_companion():
+	global sc_points
+	global sc_need
+	r = requests.get("https://steamcompanion.com/", cookies=sc_cookie, headers=headers)
+	soup = BeautifulSoup(r.text)
+	soup = soup.find(class_="points").string
+	if sc_points==soup:
+		sc_need=0
+	else:
+		sc_points=soup
+		set_notify("Бот Steam companion сообщает:", "Количество монет: "+str(soup))
+
+def get_games_from_banners():
+	soup=BeautifulSoup(requests.get("http://www.steamgifts.com/", cookies=cookie, headers=headers).text)
+	banners=soup.find(class_="pinned-giveaways__inner-wrap pinned-giveaways__inner-wrap--minimized").find_all(class_="giveaway__heading__name")
+	for games in banners:
+		if games not in giveaways_from_banner:
+			giveaways_from_banner.append(games.get("href"))
+			print("Вы не выиграете игру ", games.get("href"), ", потому что вы отказались вступать в раздачу из баннера. Ваши шансы на победу минимальны.")
+
 
 print("I am started...")
 chose=0
 random.seed(os.urandom)
-headers = {'user-agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0'}
-cookie=get_cookies()
+headers = json.loads(get_user_agent())
+cookie=get_from_file("cookie.txt")
+sc_cookie=get_from_file("steam_companion_cookies.txt")
+
 try:
 	r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 except:
 	set_notify("Куки устарели...", "Необходимо обновить куки")
 	do_beep("coockie_exept")
 	sys.exit(1)
-what_search=what_search_func()
+what_search=get_from_file("search.txt")
+time.sleep(random.randint(2,10))
 coins=get_coins(get_requests(cookie, "coins_check"))
 entered_url=get_requests(cookie, "enteredlist")
 func_list=("wishlist", "search", "someone")
 won_count=work_with_win_file(False, 0)
 set_notify("Бот начал свою работу", "Монет всего: " + str(coins))
-
+settings_list=get_from_file("settings.txt")
+func_list=[]
+sc_need=0
+sc_points=0
+need_giveaways_from_banners=0
+get_func_list()
 i_want_to_sleep=False
+forbidden_words=(" ban", " fake", " bot", "not enter", "don't enter")
+good_words=(" bank", " banan")
+
+giveaways_from_banner=[]
+if not need_giveaways_from_banners:
+	get_games_from_banners()
 
 while True:
 	i_want_to_sleep=False
@@ -276,13 +346,21 @@ while True:
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Монет осталось мало...", "А точнее: "+coins+". Глубокий сон на "+str(sleep_time//60)+" мин.")
 		print("Монет осталось мало: "+ str(coins)+". Я спать на "+str(sleep_time//60)+" мин.")
+		if sc_need:
+			steam_companion()
+		if not need_giveaways_from_banners:
+			get_games_from_banners()
 		time.sleep(sleep_time)
 		chose=0
-	if chose==3:
+	if chose==len(func_list):
 		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Я вступил во все раздачи...", "И ухожу в сон на "+str(sleep_time//60)+" мин.")
 		print("Монет осталось: "+ str(coins)+". Я спать на "+str(sleep_time//60)+" мин.")
+		if sc_need:
+			steam_companion()
+		if not need_giveaways_from_banners:
+			get_games_from_banners()
 		time.sleep(sleep_time)
 		chose=0

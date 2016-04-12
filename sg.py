@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 import os
 import json
 import platform
+import re
+
 os.chdir("/home/vodka/scripts/python/steam_gifts/")
 if platform.system()=="Linux":
 	import notify2
@@ -16,6 +18,14 @@ from subprocess import call
 import datetime
 if platform.system()=="Windows":
 	os.system("Chcp 65001")
+
+def check_new_version(ver):
+	if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version").text.rstrip("\n")==ver:
+		print("You are using the latest version of the program")
+	else:
+		print("Please, visit https://github.com/4815162342lost/steam_gifts_bot and update you bot")
+		print("What's new:")
+		print(requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new").text)
 
 def get_from_file(file_name):
 	"""read cookies from files"""
@@ -49,7 +59,7 @@ def get_requests(cookie, req_type):
 	"""get first page"""
 	global chose
 	if req_type=="wishlist":
-		print("work with wishlist")
+		print("Working with wishlist...")
 		page_number=1
 		need_next=True
 		while need_next:
@@ -64,9 +74,9 @@ def get_requests(cookie, req_type):
 			need_next=get_next_page(r)
 			page_number+=1
 	elif req_type=="search":
-		print("work with search list")
+		print("Working with search list")
 		for current_search in what_search.values():
-			print("Search giveaways with "+str(current_search))
+			print("Search giveaways contains "+str(current_search))
 			page_number=1
 			need_next=True
 			while need_next:
@@ -82,7 +92,7 @@ def get_requests(cookie, req_type):
 					break
 			time.sleep(random.randint(14,93))
 	elif req_type=="enteredlist":
-		print("get entered list")
+		print("Geting entered list")
 		entered_list=[]
 		page_number=1
 		while page_number<4:
@@ -98,7 +108,7 @@ def get_requests(cookie, req_type):
 		print("entered list return...")
 		return entered_list
 	elif req_type=="someone":
-		print("work with random")
+		print("Working with random giveaways...")
 		r=requests.get("http://www.steamgifts.com/", cookies=cookie, headers=headers)
 		get_game_links(r)
 	elif req_type=="coins_check":
@@ -129,6 +139,7 @@ def enter_geaway(geaway_link):
 	"""enter to geaways"""
 	global i_want_to_sleep
 	global chose
+	i=0; ii=0
 	try:
 		r=requests.get(geaway_link, cookies=cookie, headers=headers)
 		print(r.status_code)
@@ -138,18 +149,19 @@ def enter_geaway(geaway_link):
 		time.sleep(300)
 		return True
 	soup_enter=BeautifulSoup(r.text)
-	for word in forbidden_words:
-		if r.text.lower().find(word)!=-1:
-			for word1 in good_words:
-				if r.text.lower().find(word1)!=-1:
-					print("Ложная тревога")
-					break
-				else:
-					print("It is a trap! Be carefull! Bad people want destroy my scripts.")
-					do_beep("bad_words")
-					with open("bad_giveaways.txt","a") as bad_giveaways:
-						bad_giveaways.write(geaway_link+"\n")
-					return False
+	for bad_word in forbidden_words:
+		i+=len(re.findall(bad_word, r.text))
+	for good_word in good_words:
+		ii+=len(re.findall(good_word, r.text))
+	if i!=ii:
+		print("It is a trap! Be carefull! Bad people want destroy my scripts.")
+		do_beep("bad_words")
+		with open("bad_giveaways.txt","a") as bad_giveaways:
+			bad_giveaways.write(geaway_link+"\n")
+		return False
+	else:
+		print("False alarm. All nice.")
+			
 	try:
 		game=soup_enter.title.string
 	except:
@@ -171,19 +183,19 @@ def enter_geaway(geaway_link):
 		if extract_coins["type"]=="success":
 			coins=get_coins(get_requests(cookie, "coins_check"))
 			print("Game: "+game+". Coins: "+coins)
-			set_notify("Бот вступил в раздачу с игрой", game+". Осталось монет: "+extract_coins["points"])
+			set_notify("Bot entered to giveaways with game: ", game+". Coins left: "+extract_coins["points"])
 			time.sleep(random.randint(1,120))
 			return False
 		elif extract_coins["msg"]=="Not Enough Points":
 			coins=get_coins(get_requests(cookie, "coins_check"))
 			chose=0
 			i_want_to_sleep=True
-			print("Недостаточно монет...", geaway_link)
+			print("Not enough coins...", geaway_link)
 			return True
 	else:
 		link=soup_enter.find(class_="sidebar__error is-disabled")
 		if link!=None and link.get_text()==" Not Enough Points":
-			print("Недостаточно монет для вступления в раздачу...", geaway_link)
+			print("Not enough points to entered in ", geaway_link)
 			time.sleep(random.randint(5,60))
 			if int(get_coins(get_requests(cookie, "coins_check")))<10:
 				chose=0
@@ -192,12 +204,14 @@ def enter_geaway(geaway_link):
 		else:
 			link=soup_enter.select("div.featured__column span")
 			if link!=None:
-				print ("Раздача уже закончилась, бот не упел в неё вступить ", geaway_link)
-				print ("Она закончилась ", link[0].text)
+				print ("Giveaway was ended. Bot has late to enter giveaway: ", geaway_link)
+				print ("Was ended: ", link[0].text)
 				time.sleep(random.randint(5,60))
 				return False
 			else:
-				print ("Критическая ошибка!")
+				print ("Critical error!")
+				with open("errors.txt", "a") as error:
+					error.write(link+"\n")
 				do_beep("critical")
 				print (link)
 				return False
@@ -256,12 +270,13 @@ def check_won(count):
 		r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 		soup=BeautifulSoup(r.text).find(class_="nav__notification").string
 	except:
-		print ("You not win giveaways...")
+		print ("You did not win giveaways... But do not worry. Luck next time!")
 		work_with_win_file(True, 0)
 		return 0
 	if int(count)<int(soup):
 		do_beep("won")
-		set_notify("Бот выиграл в раздаче!", "Заберите свой приз на сайте.")
+		set_notify("Congratulations! You won!", "Take your prize on website.")
+		print("Congratulations! You won!", "Take your prize on website.")
 		work_with_win_file(True, soup)
 		return soup
 	elif int(count)>int(soup):
@@ -291,7 +306,7 @@ def steam_companion():
 		sc_need=0
 	else:
 		sc_points=soup
-		set_notify("Бот Steam companion сообщает:", "Количество монет: "+str(soup))
+		set_notify("Bot of Steam companion reports:", "Amount of coinsт: "+str(soup))
 
 def get_games_from_banners():
 	soup=BeautifulSoup(requests.get("http://www.steamgifts.com/", cookies=cookie, headers=headers).text)
@@ -299,10 +314,13 @@ def get_games_from_banners():
 	for games in banners:
 		if games not in giveaways_from_banner:
 			giveaways_from_banner.append(games.get("href"))
-			print("Вы не выиграете игру ", games.get("href"), ", потому что вы отказались вступать в раздачу из баннера. Ваши шансы на победу минимальны.")
+			print("You will never win the game ", games.get("href"), ", because you have refused to enter giveaways from banner..")
 
 
 print("I am started...")
+print("Have a nice day!")
+version="1.2.4"
+check_new_version(version)
 chose=0
 random.seed(os.urandom)
 headers = json.loads(get_user_agent())
@@ -312,7 +330,7 @@ sc_cookie=get_from_file("steam_companion_cookies.txt")
 try:
 	r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 except:
-	set_notify("Куки устарели...", "Необходимо обновить куки")
+	set_notify("Cookies expired", " Please update your cookies")
 	do_beep("coockie_exept")
 	sys.exit(1)
 what_search=get_from_file("search.txt")
@@ -321,7 +339,7 @@ coins=get_coins(get_requests(cookie, "coins_check"))
 entered_url=get_requests(cookie, "enteredlist")
 func_list=("wishlist", "search", "someone")
 won_count=work_with_win_file(False, 0)
-set_notify("Бот начал свою работу", "Монет всего: " + str(coins))
+set_notify("Steam gifts bot started", "Coins total: " + str(coins))
 settings_list=get_from_file("settings.txt")
 func_list=[]
 sc_need=0
@@ -330,7 +348,7 @@ need_giveaways_from_banners=0
 get_func_list()
 i_want_to_sleep=False
 forbidden_words=(" ban", " fake", " bot", "not enter", "don't enter")
-good_words=(" bank", " banan")
+good_words=(" bank", " banan", "both", "band")
 
 giveaways_from_banner=[]
 if not need_giveaways_from_banners:
@@ -344,8 +362,8 @@ while True:
 		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
-		set_notify("Монет осталось мало...", "А точнее: "+coins+". Глубокий сон на "+str(sleep_time//60)+" мин.")
-		print("Монет осталось мало: "+ str(coins)+". Я спать на "+str(sleep_time//60)+" мин.")
+		set_notify("Coins too low...", "Or rather: "+coins+". Deep sleep for "+str(sleep_time//60)+" min.")
+		print("Coins too low: "+ str(coins)+". Deep sleep for "+str(sleep_time//60)+" min.")
 		if sc_need:
 			steam_companion()
 		if not need_giveaways_from_banners:
@@ -356,8 +374,8 @@ while True:
 		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
-		set_notify("Я вступил во все раздачи...", "И ухожу в сон на "+str(sleep_time//60)+" мин.")
-		print("Монет осталось: "+ str(coins)+". Я спать на "+str(sleep_time//60)+" мин.")
+		set_notify("I entered to all giveaways...", "I go to sleep for "+str(sleep_time//60)+" min.")
+		print("Coins left: "+ str(coins)+". I go to sleep for "+str(sleep_time//60)+" min.")
 		if sc_need:
 			steam_companion()
 		if not need_giveaways_from_banners:

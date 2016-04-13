@@ -1,2 +1,6 @@
--fix ban check
--improve stability
+Version 1.2.5 now avaliable!
+SG changed their servers, now all post requests must be sent over https.
+Changes:
+--switched from http to https
+--the script no longer crashes due to http.
+Have a nice day! If you are girl and want say thanks, please, huge me ;)

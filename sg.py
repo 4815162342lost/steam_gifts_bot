@@ -64,7 +64,7 @@ def get_requests(cookie, req_type):
 		need_next=True
 		while need_next:
 			try:
-				r=requests.get("http://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&type=wishlist", cookies=cookie, headers=headers)
+				r=requests.get("https://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&type=wishlist", cookies=cookie, headers=headers)
 			except:
 				print("Site not avaliable")
 				time.sleep(300)
@@ -81,7 +81,7 @@ def get_requests(cookie, req_type):
 			need_next=True
 			while need_next:
 				try:
-					r=requests.get("http://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&q="+str(current_search), cookies=cookie, headers=headers)
+					r=requests.get("https://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&q="+str(current_search), cookies=cookie, headers=headers)
 					get_game_links(r)
 					need_next=get_next_page(r)
 					page_number+=1	
@@ -97,7 +97,7 @@ def get_requests(cookie, req_type):
 		page_number=1
 		while page_number<4:
 			try:
-				r=requests.get("http://www.steamgifts.com/giveaways/entered/search?page="+str(page_number), cookies=cookie, headers=headers)
+				r=requests.get("https://www.steamgifts.com/giveaways/entered/search?page="+str(page_number), cookies=cookie, headers=headers)
 				entered_list.extend(get_entered_links(r))
 				page_number+=1
 			except:
@@ -109,11 +109,11 @@ def get_requests(cookie, req_type):
 		return entered_list
 	elif req_type=="someone":
 		print("Working with random giveaways...")
-		r=requests.get("http://www.steamgifts.com/", cookies=cookie, headers=headers)
+		r=requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers)
 		get_game_links(r)
 	elif req_type=="coins_check":
 		try:
-			r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+			r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 		except:
 			print("Site not avaliable...")
 			chose=0
@@ -131,7 +131,7 @@ def get_game_links(requests_result):
 				continue
 			print(geaway_link)
 			entered_url.append(geaway_link)
-			geaway_link="http://www.steamgifts.com/" + geaway_link
+			geaway_link="https://www.steamgifts.com/" + geaway_link
 			if enter_geaway(geaway_link):
 				break
 
@@ -159,8 +159,9 @@ def enter_geaway(geaway_link):
 		with open("bad_giveaways.txt","a") as bad_giveaways:
 			bad_giveaways.write(geaway_link+"\n")
 		return False
-	else:
-		print("False alarm. All nice.")
+	if i==ii!=0:
+		print("False alarm. All nice.", geaway_link)
+		set_notify("False alarm", "All nice")
 			
 	try:
 		game=soup_enter.title.string
@@ -172,7 +173,7 @@ def enter_geaway(geaway_link):
 		link=link.find_all("input")
 		params={"xsrf_token": link[0].get("value"), "do": "entry_insert", "code": link[2].get("value")}
 		try:
-			r=requests.post("http://www.steamgifts.com/ajax.php", data=params, cookies=cookie, headers=headers)
+			r=requests.post("https://www.steamgifts.com/ajax.php", data=params, cookies=cookie, headers=headers)
 		except:
 			print("Site not avaliable...")
 			chose=0
@@ -267,7 +268,7 @@ def work_with_win_file(need_write, count):
 def check_won(count):
 	"""Check new won giveaway"""
 	try:
-		r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+		r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 		soup=BeautifulSoup(r.text).find(class_="nav__notification").string
 	except:
 		print ("You did not win giveaways... But do not worry. Luck next time!")
@@ -309,7 +310,7 @@ def steam_companion():
 		set_notify("Bot of Steam companion reports:", "Amount of coinsт: "+str(soup))
 
 def get_games_from_banners():
-	soup=BeautifulSoup(requests.get("http://www.steamgifts.com/", cookies=cookie, headers=headers).text)
+	soup=BeautifulSoup(requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers).text)
 	banners=soup.find(class_="pinned-giveaways__inner-wrap pinned-giveaways__inner-wrap--minimized").find_all(class_="giveaway__heading__name")
 	for games in banners:
 		if games not in giveaways_from_banner:
@@ -328,7 +329,7 @@ cookie=get_from_file("cookie.txt")
 sc_cookie=get_from_file("steam_companion_cookies.txt")
 
 try:
-	r=requests.get("http://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+	r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 except:
 	set_notify("Cookies expired", " Please update your cookies")
 	do_beep("coockie_exept")

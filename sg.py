@@ -8,6 +8,7 @@ import json
 import platform
 import re
 
+version="1.2.6"
 os.chdir("/home/vodka/scripts/python/steam_gifts/")
 if platform.system()=="Linux":
 	import notify2
@@ -21,8 +22,9 @@ if platform.system()=="Windows":
 
 def check_new_version(ver):
 	if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version").text.rstrip("\n")==ver:
-		print("You are using the latest version of the program")
+		print("You are using the latest version of the program. You version:", version)
 	else:
+		print("New version avaliable!")
 		print("Please, visit https://github.com/4815162342lost/steam_gifts_bot and update you bot")
 		print("What's new:")
 		print(requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new").text)
@@ -95,7 +97,7 @@ def get_requests(cookie, req_type):
 		print("Geting entered list")
 		entered_list=[]
 		page_number=1
-		while page_number<4:
+		while nedd_next_page_for_entered_link:
 			try:
 				r=requests.get("https://www.steamgifts.com/giveaways/entered/search?page="+str(page_number), cookies=cookie, headers=headers)
 				entered_list.extend(get_entered_links(r))
@@ -220,6 +222,7 @@ def enter_geaway(geaway_link):
 
 def get_entered_links(requests_result):
 	"""Entered giveaway list. ignore it"""
+	global nedd_next_page_for_entered_link
 	entered_list=[]
 	soup=BeautifulSoup(requests_result.text)
 	links=soup.find_all(class_="table__row-inner-wrap")
@@ -228,6 +231,11 @@ def get_entered_links(requests_result):
 		check_geaways_end=get_link.find(class_="table__remove-default is-clickable")
 		if check_geaways_end!=None:
 			entered_list.append(url)
+		elif get_link.find(class_="table__column__deleted")!=None:
+			continue
+		else:
+			nedd_next_page_for_entered_link=False
+			return entered_list
 	return entered_list
 
 def get_coins(requests_result):
@@ -320,7 +328,6 @@ def get_games_from_banners():
 
 print("I am started...")
 print("Have a nice day!")
-version="1.2.5"
 check_new_version(version)
 chose=0
 random.seed(os.urandom)
@@ -337,6 +344,7 @@ except:
 what_search=get_from_file("search.txt")
 time.sleep(random.randint(2,10))
 coins=get_coins(get_requests(cookie, "coins_check"))
+nedd_next_page_for_entered_link=True
 entered_url=get_requests(cookie, "enteredlist")
 func_list=("wishlist", "search", "someone")
 won_count=work_with_win_file(False, 0)

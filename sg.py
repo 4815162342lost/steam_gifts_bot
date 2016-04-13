@@ -320,7 +320,7 @@ def get_games_from_banners():
 
 print("I am started...")
 print("Have a nice day!")
-version="1.2.4"
+version="1.2.5"
 check_new_version(version)
 chose=0
 random.seed(os.urandom)

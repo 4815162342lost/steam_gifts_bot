@@ -12,6 +12,8 @@ version="1.2.6"
 os.chdir("/home/vodka/scripts/python/steam_gifts/")
 if platform.system()=="Linux":
 	import notify2
+	import gi
+	gi.require_version('GdkPixbuf', '2.0') 
 	from gi.repository.GdkPixbuf import Pixbuf
 	pb=Pixbuf.new_from_file("icon.png")
 import sys
@@ -124,7 +126,7 @@ def get_requests(cookie, req_type):
 
 def get_game_links(requests_result):
 	"""call enter_geaways and extract link"""
-	soup=BeautifulSoup(requests_result.text)
+	soup=BeautifulSoup(requests_result.text, "html.parser")
 	link=soup.find_all(class_="giveaway__heading__name")
 	for get_link in link:
 		geaway_link=get_link.get("href")
@@ -141,7 +143,7 @@ def enter_geaway(geaway_link):
 	"""enter to geaways"""
 	global i_want_to_sleep
 	global chose
-	i=0; ii=0
+	bad_counter=0; good_counter=0
 	try:
 		r=requests.get(geaway_link, cookies=cookie, headers=headers)
 		print(r.status_code)
@@ -150,21 +152,21 @@ def enter_geaway(geaway_link):
 		chose=0
 		time.sleep(300)
 		return True
-	soup_enter=BeautifulSoup(r.text)
+	soup_enter=BeautifulSoup(r.text, "html.parser")
 	for bad_word in forbidden_words:
-		i+=len(re.findall(bad_word, r.text))
-	for good_word in good_words:
-		ii+=len(re.findall(good_word, r.text))
-	if i!=ii:
-		print("It is a trap! Be carefull! Bad people want destroy my scripts.")
-		do_beep("bad_words")
-		with open("bad_giveaways.txt","a") as bad_giveaways:
-			bad_giveaways.write(geaway_link+"\n")
-		return False
-	if i==ii!=0:
-		print("False alarm. All nice.", geaway_link)
-		set_notify("False alarm", "All nice")
-			
+		bad_counter+=len(re.findall(bad_word, r.text, flags=re.IGNORECASE))
+	if bad_counter>0:
+		for good_word in good_words:
+			good_counter+=len(re.findall(good_word, r.text, flags=re.IGNORECASE))
+		if bad_counter!=good_counter:
+			print("It is a trap! Be carefull! Bad people want destroy my scripts.")
+			do_beep("bad_words")
+			with open("bad_giveaways.txt","a") as bad_giveaways:
+				bad_giveaways.write(geaway_link+"\n")
+			return False
+		if bad_counter==good_counter:
+			print("False alarm. All nice.", geaway_link)
+			set_notify("False alarm", "All nice")		
 	try:
 		game=soup_enter.title.string
 	except:
@@ -184,17 +186,20 @@ def enter_geaway(geaway_link):
 		extract_coins=json.loads(r.text)
 		print(r.text)
 		if extract_coins["type"]=="success":
-			coins=get_coins(get_requests(cookie, "coins_check"))
+			coins=extract_coins["points"]
 			print("Game: "+game+". Coins: "+coins)
 			set_notify("Bot entered to giveaways with game: ", game+". Coins left: "+extract_coins["points"])
 			time.sleep(random.randint(1,120))
 			return False
 		elif extract_coins["msg"]=="Not Enough Points":
 			coins=get_coins(get_requests(cookie, "coins_check"))
-			chose=0
-			i_want_to_sleep=True
-			print("Not enough coins...", geaway_link)
-			return True
+			if coins<10:
+				chose=0
+				i_want_to_sleep=True
+				print("Not enough coins...", geaway_link)
+				return True
+			else:
+				return False
 	else:
 		link=soup_enter.find(class_="sidebar__error is-disabled")
 		if link!=None and link.get_text()==" Not Enough Points":
@@ -224,7 +229,7 @@ def get_entered_links(requests_result):
 	"""Entered giveaway list. ignore it"""
 	global nedd_next_page_for_entered_link
 	entered_list=[]
-	soup=BeautifulSoup(requests_result.text)
+	soup=BeautifulSoup(requests_result.text, "html.parser")
 	links=soup.find_all(class_="table__row-inner-wrap")
 	for get_link in links:
 		url=get_link.find(class_="table__column__heading").get("href")
@@ -240,7 +245,7 @@ def get_entered_links(requests_result):
 
 def get_coins(requests_result):
 	"""how many coins"""
-	soup=BeautifulSoup(requests_result.text)
+	soup=BeautifulSoup(requests_result.text, "html.parser")
 	coins=soup.find(class_="nav__points").string
 	return coins
 
@@ -277,7 +282,7 @@ def check_won(count):
 	"""Check new won giveaway"""
 	try:
 		r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
-		soup=BeautifulSoup(r.text).find(class_="nav__notification").string
+		soup=BeautifulSoup(r.text, "html.parser").find(class_="nav__right-container").find_all("a")[1].find(class_="nav__notification").string
 	except:
 		print ("You did not win giveaways... But do not worry. Luck next time!")
 		work_with_win_file(True, 0)
@@ -309,7 +314,7 @@ def steam_companion():
 	global sc_points
 	global sc_need
 	r = requests.get("https://steamcompanion.com/", cookies=sc_cookie, headers=headers)
-	soup = BeautifulSoup(r.text)
+	soup = BeautifulSoup(r.text, "html.parser")
 	soup = soup.find(class_="points").string
 	if sc_points==soup:
 		sc_need=0
@@ -318,7 +323,7 @@ def steam_companion():
 		set_notify("Bot of Steam companion reports:", "Amount of coinsт: "+str(soup))
 
 def get_games_from_banners():
-	soup=BeautifulSoup(requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers).text)
+	soup=BeautifulSoup(requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers).text, "html.parser")
 	banners=soup.find(class_="pinned-giveaways__inner-wrap pinned-giveaways__inner-wrap--minimized").find_all(class_="giveaway__heading__name")
 	for games in banners:
 		if games not in giveaways_from_banner:
@@ -356,8 +361,8 @@ sc_points=0
 need_giveaways_from_banners=0
 get_func_list()
 i_want_to_sleep=False
-forbidden_words=(" ban", " fake", " bot", "not enter", "don't enter")
-good_words=(" bank", " banan", "both", "band")
+forbidden_words=(" ban", " fake", " bot", " not enter", " don't enter")
+good_words=(" bank", " banan", " both", " band")
 
 giveaways_from_banner=[]
 if not need_giveaways_from_banners:

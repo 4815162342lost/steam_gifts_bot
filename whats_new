@@ -1,8 +1,4 @@
-Version 1.2.7 avaliable now!
+Version 1.2.8 avaliable now!
 What;s new:
---improved antiban systems
---removed some extra requests (now traffik will be less on ~49%)
---antiban systen now work rapid and faster. Removed extra search.
---fix error, when instead "won giveaways" program consider "create non-send giveaways"
--- fixed warning "UserWarning: No parser was explicitly specified, so I'm using the best available HTML parser for this system ("lxml")..." with new vwrsion of beautifullSoup
--- fixed warning " PyGIWarning: GdkPixbuf was imported without specifying a version first. Use gi.require_version('GdkPixbuf', '2.0') before import to ensure that the right version gets loaded." (Linux only)
+--adding blacklist game (black_list_games_name.txt)
+--adding blacklist giveaways (bad_giveaways_link.txt)

@@ -58,7 +58,6 @@ def get_func_list():
 	if settings_list["giveaways_from_banners"]:
 		need_giveaways_from_banners=1
 
-
 def get_requests(cookie, req_type):
 	"""get first page"""
 	global chose
@@ -133,12 +132,15 @@ def get_game_links(requests_result):
 		if not geaway_link in entered_url:
 			if not need_giveaways_from_banners and geaway_link in giveaways_from_banner:
 				continue
-			print(geaway_link)
 			entered_url.append(geaway_link)
-			geaway_link="https://www.steamgifts.com/" + geaway_link
-			if enter_geaway(geaway_link):
-				break
-
+			geaway_link="https://www.steamgifts.com" + geaway_link
+			print(geaway_link)
+			if geaway_link not in bad_giveaways_link:
+				if enter_geaway(geaway_link):
+					break
+			else:
+				print("giveaway in blacklist. Ignore")
+				set_notify("Giveaway url on black list, ignore", geaway_link[geaway_link.rfind("/")+1:])
 def enter_geaway(geaway_link):
 	"""enter to geaways"""
 	global i_want_to_sleep
@@ -146,7 +148,9 @@ def enter_geaway(geaway_link):
 	bad_counter=0; good_counter=0
 	try:
 		r=requests.get(geaway_link, cookies=cookie, headers=headers)
-		print(r.status_code)
+		if r.status_code!=200:
+			print(r.status_code)
+			set_notify("Site error", "Error  code: "+str(r.status_code))
 	except:
 		print("Site not avaliable...")
 		chose=0
@@ -172,6 +176,10 @@ def enter_geaway(geaway_link):
 	except:
 		print("No name")
 		game="Unknown game"
+	if game in bad_games_name:
+		print("You do not like this game")
+		set_notify("Game from blacklist. Ignore", game)
+		return False
 	link=soup_enter.find(class_="sidebar sidebar--wide").form
 	if link!=None:
 		link=link.find_all("input")
@@ -184,11 +192,11 @@ def enter_geaway(geaway_link):
 			time.sleep(300)	
 			return True
 		extract_coins=json.loads(r.text)
-		print(r.text)
+#		print(r.text)
 		if extract_coins["type"]=="success":
 			coins=extract_coins["points"]
-			print("Game: "+game+". Coins: "+coins)
-			set_notify("Bot entered to giveaways with game: ", game+". Coins left: "+extract_coins["points"])
+			print("Game: "+ re.sub("[^A-Za-z0-9 +-.,:!()]", "", game).rstrip(" ")+". Coins: "+coins)
+			set_notify("Bot entered to giveaways with game: ", re.sub("&", '',  game)+". Coins left: "+extract_coins["points"])
 			time.sleep(random.randint(1,120))
 			return False
 		elif extract_coins["msg"]=="Not Enough Points":
@@ -355,6 +363,8 @@ func_list=("wishlist", "search", "someone")
 won_count=work_with_win_file(False, 0)
 set_notify("Steam gifts bot started", "Coins total: " + str(coins))
 settings_list=get_from_file("settings.txt")
+bad_games_name=get_from_file("black_list_games_name.txt").values()
+bad_giveaways_link=get_from_file("bad_giveaways_link.txt").values()
 func_list=[]
 sc_need=0
 sc_points=0
@@ -362,12 +372,14 @@ need_giveaways_from_banners=0
 get_func_list()
 i_want_to_sleep=False
 forbidden_words=(" ban", " fake", " bot", " not enter", " don't enter")
-good_words=(" bank", " banan", " both", " band")
+good_words=(" bank", " banan", " both", " band", " banner")
 
 giveaways_from_banner=[]
 if not need_giveaways_from_banners:
 	get_games_from_banners()
 
+enter_geaway("https://www.steamgifts.com/giveaway/3tTZB/strider-sutoraida-fei-long")
+exit()
 while True:
 	i_want_to_sleep=False
 	requests_result=get_requests(cookie, func_list[chose])

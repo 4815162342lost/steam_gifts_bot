@@ -2,3 +2,4 @@ Version 1.2.8 avaliable now!
 What;s new:
 --adding blacklist game (black_list_games_name.txt)
 --adding blacklist giveaways (bad_giveaways_link.txt)
+--fixing special characteristiks on Windows! Now you do not must change fonts on consoles!!!

@@ -1,7 +1,7 @@
 # steam gifts bot
 Written on Python3.
 
-'''Description'''
+Description
 bot for http://www.steamgifts.com/ I use my program 1 month, all good, But if you account will be banned, i not will be guilty.
 
 Requirements: python 3

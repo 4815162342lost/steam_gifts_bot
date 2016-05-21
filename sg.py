@@ -378,8 +378,6 @@ giveaways_from_banner=[]
 if not need_giveaways_from_banners:
 	get_games_from_banners()
 
-enter_geaway("https://www.steamgifts.com/giveaway/3tTZB/strider-sutoraida-fei-long")
-exit()
 while True:
 	i_want_to_sleep=False
 	requests_result=get_requests(cookie, func_list[chose])

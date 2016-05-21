@@ -8,7 +8,7 @@ import json
 import platform
 import re
 
-version="1.2.7"
+version="1.2.8"
 os.chdir("/home/vodka/scripts/python/steam_gifts/")
 if platform.system()=="Linux":
 	import notify2

@@ -1,3 +1,1 @@
 PHPSESSID="lsdsdddddddddddddddddddssssssssssssshlb3mk8ugcvdsdsdddddddddddddddd"
-_ga="GA1.2.85656555555.12585563338"
-_gat="1"

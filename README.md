@@ -1,4 +1,4 @@
-# steam gifts bot
+# steamgifts bot
 Written on Python3.
 
 ####Description

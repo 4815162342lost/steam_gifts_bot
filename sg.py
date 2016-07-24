@@ -168,7 +168,7 @@ def enter_geaway(geaway_link):
 			with open("bad_giveaways.txt","a") as bad_giveaways:
 				bad_giveaways.write(geaway_link+"\n")
 			return False
-		if bad_counter!=good_counter:
+		if bad_counter==good_counter:
 			print("False alarm. All nice.", geaway_link)
 			set_notify("False alarm", "All nice")		
 	try:

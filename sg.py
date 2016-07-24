@@ -93,7 +93,7 @@ def get_requests(cookie, req_type):
 					chose=0
 					time.sleep(300)	
 					break
-			time.sleep(random.randint(14,93))
+			time.sleep(random.randint(8,39))
 	elif req_type=="enteredlist":
 		print("Geting entered list")
 		entered_list=[]
@@ -162,13 +162,13 @@ def enter_geaway(geaway_link):
 	if bad_counter>0:
 		for good_word in good_words:
 			good_counter+=len(re.findall(good_word, r.text, flags=re.IGNORECASE))
-		if bad_counter!=good_counter:
+		if bad_counter>good_counter:
 			print("It is a trap! Be carefull! Bad people want destroy my scripts.")
 			do_beep("bad_words")
 			with open("bad_giveaways.txt","a") as bad_giveaways:
 				bad_giveaways.write(geaway_link+"\n")
 			return False
-		if bad_counter==good_counter:
+		if bad_counter!=good_counter:
 			print("False alarm. All nice.", geaway_link)
 			set_notify("False alarm", "All nice")		
 	try:
@@ -297,7 +297,7 @@ def check_won(count):
 		return 0
 	if int(count)<int(soup):
 		do_beep("won")
-		set_notify("Congratulations! You won!", "Take your prize on website.")
+		set_notify("Congratulations! You won!", "Take your prize on website")
 		print("Congratulations! You won!", "Take your prize on website.")
 		work_with_win_file(True, soup)
 		return soup
@@ -321,9 +321,14 @@ def do_beep(reason):
 def steam_companion():
 	global sc_points
 	global sc_need
-	r = requests.get("https://steamcompanion.com/", cookies=sc_cookie, headers=headers)
-	soup = BeautifulSoup(r.text, "html.parser")
-	soup = soup.find(class_="points").string
+	try:
+		r = requests.get("https://steamcompanion.com/", cookies=sc_cookie, headers=headers)
+		soup = BeautifulSoup(r.text, "html.parser")
+		soup = soup.find(class_="points").string
+	except:
+		set_notify("Steamcompanion:", "site not available...")
+		print("Steamcompanion not available...")
+		return 0	
 	if sc_points==soup:
 		sc_need=0
 	else:
@@ -372,13 +377,15 @@ need_giveaways_from_banners=0
 get_func_list()
 i_want_to_sleep=False
 forbidden_words=(" ban", " fake", " bot", " not enter", " don't enter")
-good_words=(" bank", " banan", " both", " band", " banner")
+good_words=(" bank", " banan", " both", " band", " banner", " bang")
 
 giveaways_from_banner=[]
 if not need_giveaways_from_banners:
 	get_games_from_banners()
 
 while True:
+	if not need_giveaways_from_banners:
+			get_games_from_banners()
 	i_want_to_sleep=False
 	requests_result=get_requests(cookie, func_list[chose])
 	chose+=1
@@ -390,8 +397,6 @@ while True:
 		print("Coins too low: "+ str(coins)+". Deep sleep for "+str(sleep_time//60)+" min.")
 		if sc_need:
 			steam_companion()
-		if not need_giveaways_from_banners:
-			get_games_from_banners()
 		time.sleep(sleep_time)
 		chose=0
 	if chose==len(func_list):
@@ -402,7 +407,5 @@ while True:
 		print("Coins left: "+ str(coins)+". I go to sleep for "+str(sleep_time//60)+" min.")
 		if sc_need:
 			steam_companion()
-		if not need_giveaways_from_banners:
-			get_games_from_banners()
 		time.sleep(sleep_time)
 		chose=0

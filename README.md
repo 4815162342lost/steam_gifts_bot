@@ -1,5 +1,5 @@
 # steamgifts bot
-Written on Python3.
+The program is written in Python 3.
 
 ####Description
 Bot for http://www.steamgifts.com/ 

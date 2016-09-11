@@ -9,9 +9,9 @@ import platform
 import re
 
 version="1.2.8"
-os.chdir("/home/vodka/scripts/python/steam_gifts/")
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 if platform.system()=="Linux":
-	import notify2
+	import notify2 
 	import gi
 	gi.require_version('GdkPixbuf', '2.0') 
 	from gi.repository.GdkPixbuf import Pixbuf
@@ -139,7 +139,6 @@ def get_game_links(requests_result):
 				if enter_geaway(geaway_link):
 					break
 			else:
-				print("giveaway in blacklist. Ignore")
 				set_notify("Giveaway url on black list, ignore", geaway_link[geaway_link.rfind("/")+1:])
 def enter_geaway(geaway_link):
 	"""enter to geaways"""
@@ -149,8 +148,7 @@ def enter_geaway(geaway_link):
 	try:
 		r=requests.get(geaway_link, cookies=cookie, headers=headers)
 		if r.status_code!=200:
-			print(r.status_code)
-			set_notify("Site error", "Error  code: "+str(r.status_code))
+			set_notify("Site error", "Error	 code: "+str(r.status_code))
 	except:
 		print("Site not avaliable...")
 		chose=0
@@ -169,7 +167,6 @@ def enter_geaway(geaway_link):
 				bad_giveaways.write(geaway_link+"\n")
 			return False
 		if bad_counter==good_counter:
-			print("False alarm. All nice.", geaway_link)
 			set_notify("False alarm", "All nice")		
 	try:
 		game=soup_enter.title.string
@@ -177,7 +174,6 @@ def enter_geaway(geaway_link):
 		print("No name")
 		game="Unknown game"
 	if game in bad_games_name:
-		print("You do not like this game")
 		set_notify("Game from blacklist. Ignore", game)
 		return False
 	link=soup_enter.find(class_="sidebar sidebar--wide").form
@@ -195,7 +191,6 @@ def enter_geaway(geaway_link):
 #		print(r.text)
 		if extract_coins["type"]=="success":
 			coins=extract_coins["points"]
-			print("Game: "+ re.sub("[^A-Za-z0-9 +-.,:!()]", "", game).rstrip(" ")+". Coins: "+coins)
 			set_notify("Bot entered to giveaways with game: ", re.sub("&", '',  game)+". Coins left: "+extract_coins["points"])
 			time.sleep(random.randint(1,120))
 			return False
@@ -265,14 +260,19 @@ def get_next_page(requests):
 		return False
 		
 def set_notify(head, text):
-	"""Set notify. Only on Linux"""
+	"""Set notify. Writes message to console, displays gui notification in Linux"""
+	print(head, " ", text)
 	if platform.system()!="Linux":
 		return 0
-	notify2.init('Steam_gifts_bot')
-	n = notify2.Notification(head, text)
-	n.set_timeout(15000)
-	n.set_icon_from_pixbuf(pb)
-	n.show()
+	try:
+		notify2.init('Steam_gifts_bot')
+		n = notify2.Notification(head, text)
+		n.set_timeout(15000)
+		n.set_icon_from_pixbuf(pb)
+		n.show()
+	except: # Error showing notification. Still have console message.
+		pass
+                
 
 def work_with_win_file(need_write, count):
 	"""Function for read drom file or write to file won.txt"""
@@ -298,7 +298,6 @@ def check_won(count):
 	if int(count)<int(soup):
 		do_beep("won")
 		set_notify("Congratulations! You won!", "Take your prize on website")
-		print("Congratulations! You won!", "Take your prize on website.")
 		work_with_win_file(True, soup)
 		return soup
 	elif int(count)>int(soup):
@@ -327,7 +326,6 @@ def steam_companion():
 		soup = soup.find(class_="points").string
 	except:
 		set_notify("Steamcompanion:", "site not available...")
-		print("Steamcompanion not available...")
 		return 0	
 	if sc_points==soup:
 		sc_need=0
@@ -357,7 +355,7 @@ try:
 	r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
 except:
 	set_notify("Cookies expired", " Please update your cookies")
-	do_beep("coockie_exept")
+	do_beep("cookie_except")
 	sys.exit(1)
 what_search=get_from_file("search.txt")
 time.sleep(random.randint(2,10))
@@ -394,7 +392,6 @@ while True:
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Coins too low...", "Or rather: "+coins+". Deep sleep for "+str(sleep_time//60)+" min.")
-		print("Coins too low: "+ str(coins)+". Deep sleep for "+str(sleep_time//60)+" min.")
 		if sc_need:
 			steam_companion()
 		time.sleep(sleep_time)
@@ -403,8 +400,7 @@ while True:
 		won_count=check_won(won_count)
 		sleep_time=random.randint(1800,3600)
 		coins=get_coins(get_requests(cookie, "coins_check"))
-		set_notify("I entered to all giveaways...", "I go to sleep for "+str(sleep_time//60)+" min.")
-		print("Coins left: "+ str(coins)+". I go to sleep for "+str(sleep_time//60)+" min.")
+		set_notify("I entered to all giveaways...", "Coins left: "+ str(coins)+". I go to sleep for "+str(sleep_time//60)+" min.")
 		if sc_need:
 			steam_companion()
 		time.sleep(sleep_time)

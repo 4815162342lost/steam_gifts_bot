@@ -234,6 +234,9 @@ def get_entered_links(requests_result):
 	entered_list=[]
 	soup=BeautifulSoup(requests_result.text, "html.parser")
 	links=soup.find_all(class_="table__row-inner-wrap")
+	if not links:
+		nedd_next_page_for_entered_link=False
+		return entered_list
 	for get_link in links:
 		url=get_link.find(class_="table__column__heading").get("href")
 		check_geaways_end=get_link.find(class_="table__remove-default is-clickable")

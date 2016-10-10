@@ -175,7 +175,7 @@ def enter_geaway(geaway_link):
 				bad_giveaways.write(geaway_link+"\n")
 			return False
 		if bad_counter==good_counter:
-			debug_messages("False alarm. All nice.", geaway_link)
+			debug_messages("False alarm. All nice."+str(geaway_link))
 			set_notify("False alarm", "All nice")		
 	try:
 		game=soup_enter.title.string
@@ -210,14 +210,14 @@ def enter_geaway(geaway_link):
 			if coins<10:
 				chose=0
 				i_want_to_sleep=True
-				debug_messages("Not enough coins...", geaway_link)
+				debug_messages("Not enough coins..." + str(geaway_link))
 				return True
 			else:
 				return False
 	else:
 		link=soup_enter.find(class_="sidebar__error is-disabled")
 		if link!=None and link.get_text()==" Not Enough Points":
-			debug_messages("Not enough points to entered in ", geaway_link)
+			debug_messages("Not enough points to entered in "+str(geaway_link))
 			time.sleep(random.randint(5,60))
 			if int(get_coins(get_requests(cookie, "coins_check")))<10:
 				chose=0
@@ -359,8 +359,7 @@ def get_games_from_banners():
 	for games in banners:
 		if games not in giveaways_from_banner:
 			giveaways_from_banner.append(games.get("href"))
-			debug_messages("You will never win the game ", games.get("href"), ", because you have refused to enter giveaways from banner..")
-
+			debug_messages("You will never win the game " + games.get("href") + ", because you have refused to enter giveaways from banner..")
 
 print("I am started...\nHave a nice day!")
 func_list=[]

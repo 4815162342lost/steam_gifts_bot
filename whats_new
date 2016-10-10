@@ -1,5 +1,8 @@
 Version 1.2.8 avaliable now!
-What;s new:
---adding blacklist game (black_list_games_name.txt)
---adding blacklist giveaways (bad_giveaways_link.txt)
---fixing special characteristiks on Windows! Now you do not must change fonts on consoles!!!
+PLEASE, download new settings.txt file and repleca old file
+What's new:
+  -- removing junk messages from console and adding debug mode
+  -- now you do not need change the directory in script (thanks for grray)
+  -- fixed bug when scripts do not work when there are not entered giveaways (thanks for grray for found the bug)
+  -- adding switching beep sound
+  -- adding switching notify

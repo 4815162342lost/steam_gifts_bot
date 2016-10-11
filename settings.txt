@@ -5,4 +5,5 @@ random_list=1
 steam_companion_bot=0
 send_notify=1
 beep=1
-debug_mode=0
+debug_mode=1
+threshold=10

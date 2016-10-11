@@ -46,7 +46,7 @@ def get_func_list():
 	"""Set necessary parameters (what type of the giveaways, need beep or not, debug mode or not, need notify or not)"""
 	global sc_need; global need_giveaways_from_banners
 	global need_send_notify; global need_beep
-	global debug_mode
+	global debug_mode; global threshold
 	if settings_list["wishlist"]:
 		func_list.append("wishlist")
 	if settings_list["search_list"]:
@@ -63,6 +63,8 @@ def get_func_list():
 		need_beep=1
 	if settings_list["debug_mode"]:
 		debug_mode=1
+	threshold=settings_list["threshold"]
+
 
 def get_requests(cookie, req_type):
 	"""get first page"""
@@ -116,8 +118,9 @@ def get_requests(cookie, req_type):
 				break
 		debug_messages("return entered list...")
 		return entered_list
-	elif req_type=="someone":
+	elif req_type=="someone" and int(get_coins(get_requests(cookie, "coins_check")))>int(threshold):
 		print("Working with random giveaways...")
+		debug_messages("coins:"+str(get_coins(get_requests(cookie, "coins_check"))))
 		r=requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers)
 		get_game_links(r)
 	elif req_type=="coins_check":
@@ -226,8 +229,8 @@ def enter_geaway(geaway_link):
 		else:
 			link=soup_enter.select("div.featured__column span")
 			if link!=None:
-				debug_messages("Giveaway was ended. Bot has late to enter giveaway: ", geaway_link)
-				debug_messages("Was ended: ", link[0].text)
+				debug_messages("Giveaway was ended. Bot has late to enter giveaway: "+ str(geaway_link))
+				debug_messages("Was ended: "+ str(link[0].text))
 				time.sleep(random.randint(5,60))
 				return False
 			else:
@@ -326,7 +329,7 @@ def do_beep(reason):
 	if not need_beep:
 		return 0
 	"""do beep with PC speacker. Work only on Linux and requrement motherboard speaker"""
-	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22 and platform.system()=="Linux":
+	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22 and (platform.system()=="Linux" or platform.system()=="FreeBSD"):
 		if reason=="coockie_exept":
 			call(["beep", "-l 2000",  "-f 1900", "-r 3"])
 		elif reason=="critical":
@@ -359,13 +362,13 @@ def get_games_from_banners():
 	for games in banners:
 		if games not in giveaways_from_banner:
 			giveaways_from_banner.append(games.get("href"))
-			debug_messages("You will never win the game " + games.get("href") + ", because you have refused to enter giveaways from banner..")
+			debug_messages("You will never win the game " + str(games.get("href")) + ", because you have refused to enter giveaways from banner..")
 
 print("I am started...\nHave a nice day!")
 func_list=[]
 sc_need=0; sc_points=0
 need_giveaways_from_banners=0
-need_send_notify=0
+need_send_notify=0; threshold=0;
 need_beep=0; debug_mode=0
 check_new_version(version)
 chose=0

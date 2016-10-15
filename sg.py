@@ -23,12 +23,15 @@ if platform.system()=="Windows":
 	os.system("Chcp 65001")
 
 def check_new_version(ver):
-	if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version").text.rstrip("\n")==ver:
-		print("You are using the latest version of the program. You version:", version)
-	else:
-		print("New version avaliable!\nPlease, visit https://github.com/4815162342lost/steam_gifts_bot and update you bot")
-		print("What's new:")
-		print(requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new").text)
+	try:
+		if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version").text.rstrip("\n")==ver:
+			print("You are using the latest version of the program. You version:", version)
+		else:
+			print("New version avaliable!\nPlease, visit https://github.com/4815162342lost/steam_gifts_bot and update you bot")
+			print("What's new:")
+			print(requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new").text)
+	except:
+		print("Can not check new version. Github not available or internet are not working")
 
 def get_from_file(file_name):
 	"""read data from files"""
@@ -47,6 +50,7 @@ def get_func_list():
 	global sc_need; global need_giveaways_from_banners
 	global need_send_notify; global need_beep
 	global debug_mode; global threshold
+	global silent_mode_at_nigtt;
 	if settings_list["wishlist"]:
 		func_list.append("wishlist")
 	if settings_list["search_list"]:
@@ -64,6 +68,7 @@ def get_func_list():
 	if settings_list["debug_mode"]:
 		debug_mode=1
 	threshold=settings_list["threshold"]
+	silent_mode_at_nigtt = settings_list["silent_mode_at_nigtt"]
 
 
 def get_requests(cookie, req_type):
@@ -76,14 +81,14 @@ def get_requests(cookie, req_type):
 		while need_next:
 			try:
 				r=requests.get("https://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&type=wishlist", cookies=cookie, headers=headers)
+				get_game_links(r)
+				need_next = get_next_page(r)
+				page_number += 1
 			except:
 				print("Site not avaliable")
 				time.sleep(300)
 				chose=0
 				break
-			get_game_links(r)
-			need_next=get_next_page(r)
-			page_number+=1
 	elif req_type=="search":
 		print("Working with search list")
 		for current_search in what_search.values():
@@ -95,7 +100,8 @@ def get_requests(cookie, req_type):
 					r=requests.get("https://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&q="+str(current_search), cookies=cookie, headers=headers)
 					get_game_links(r)
 					need_next=get_next_page(r)
-					page_number+=1	
+					page_number+=1
+					time.sleep(random.randint(3, 7))
 				except:
 					print("Site not avaliable")
 					chose=0
@@ -116,21 +122,27 @@ def get_requests(cookie, req_type):
 				chose=0
 				time.sleep(300)	
 				break
-		debug_messages("return entered list...")
+			debug_messages("return entered list...")
 		return entered_list
 	elif req_type=="someone" and int(get_coins(get_requests(cookie, "coins_check")))>int(threshold):
 		print("Working with random giveaways...")
-		debug_messages("coins:"+str(get_coins(get_requests(cookie, "coins_check"))))
-		r=requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers)
-		get_game_links(r)
-	elif req_type=="coins_check":
+		time.sleep(random.randint(5,11))
 		try:
-			r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+			r=requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers)
+			get_game_links(r)
 		except:
 			print("Site not avaliable...")
 			chose=0
 			time.sleep(300)
-	return r
+	elif req_type=="coins_check":
+		try:
+			r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+			return r
+		except:
+			print("Site not avaliable...")
+			chose=0
+			time.sleep(300)
+			return 0
 
 def get_game_links(requests_result):
 	"""call enter_geaways and extract link"""
@@ -195,12 +207,12 @@ def enter_geaway(geaway_link):
 		params={"xsrf_token": link[0].get("value"), "do": "entry_insert", "code": link[2].get("value")}
 		try:
 			r=requests.post("https://www.steamgifts.com/ajax.php", data=params, cookies=cookie, headers=headers)
+			extract_coins = json.loads(r.text)
 		except:
 			print("Site not avaliable...")
 			chose=0
 			time.sleep(300)	
 			return True
-		extract_coins=json.loads(r.text)
 #		print(r.text)
 		if extract_coins["type"]=="success":
 			coins=extract_coins["points"]
@@ -246,8 +258,11 @@ def get_entered_links(requests_result):
 	"""Entered giveaway list. ignore it"""
 	global nedd_next_page_for_entered_link
 	entered_list=[]
-	soup=BeautifulSoup(requests_result.text, "html.parser")
-	links=soup.find_all(class_="table__row-inner-wrap")
+	try:
+		soup=BeautifulSoup(requests_result.text, "html.parser")
+		links=soup.find_all(class_="table__row-inner-wrap")
+	except:
+		return entered_list
 	for get_link in links:
 		url=get_link.find(class_="table__column__heading").get("href")
 		check_geaways_end=get_link.find(class_="table__remove-default is-clickable")
@@ -262,16 +277,22 @@ def get_entered_links(requests_result):
 
 def get_coins(requests_result):
 	"""how many coins"""
-	soup=BeautifulSoup(requests_result.text, "html.parser")
-	coins=soup.find(class_="nav__points").string
-	return coins
+	try:
+		soup=BeautifulSoup(requests_result.text, "html.parser")
+		coins=soup.find(class_="nav__points").string
+		return coins
+	except:
+		return 0
 
 def get_next_page(requests):
 	"""Next page exists?"""
-	if requests.text.find("Next")!=-1:
-		return True
-	else:
-		return False
+	try:
+		if requests.text.find("Next")!=-1:
+			return True
+		else:
+			return False
+	except:
+		return  False
 		
 def set_notify(head, text):
 	"""Set notify. Only on Linux"""
@@ -326,10 +347,13 @@ def check_won(count):
 	return count
 
 def do_beep(reason):
+	"""do beep with PC speacker. Work only on Linux and requrement motherboard speaker"""
 	if not need_beep:
 		return 0
-	"""do beep with PC speacker. Work only on Linux and requrement motherboard speaker"""
-	if datetime.datetime.now().time().hour>9 and datetime.datetime.now().time().hour<22 and (platform.system()=="Linux" or platform.system()=="FreeBSD"):
+	if (datetime.datetime.now().time().hour<9 or datetime.datetime.now().time().hour>22) and silent_mode_at_nigtt and (platform.system()=="Linux" or platform.system()=="FreeBSD"):
+		debug_messages("Not beep, because too late")
+		return 0
+	if  platform.system()=="Linux" or platform.system()=="FreeBSD":
 		if reason=="coockie_exept":
 			call(["beep", "-l 2000",  "-f 1900", "-r 3"])
 		elif reason=="critical":
@@ -370,6 +394,7 @@ sc_need=0; sc_points=0
 need_giveaways_from_banners=0
 need_send_notify=0; threshold=0;
 need_beep=0; debug_mode=0
+silent_mode_at_nigtt=0
 check_new_version(version)
 chose=0
 random.seed(os.urandom)
@@ -398,10 +423,10 @@ get_func_list()
 i_want_to_sleep=False
 forbidden_words=(" ban", " fake", " bot", " not enter", " don't enter")
 good_words=(" bank", " banan", " both", " band", " banner", " bang")
-
 giveaways_from_banner=[]
 if not need_giveaways_from_banners:
 	get_games_from_banners()
+print("Total coins:", get_coins(get_requests(cookie, "coins_check")))
 
 while True:
 	if not need_giveaways_from_banners:

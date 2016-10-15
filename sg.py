@@ -50,7 +50,7 @@ def get_func_list():
 	global sc_need; global need_giveaways_from_banners
 	global need_send_notify; global need_beep
 	global debug_mode; global threshold
-	global silent_mode_at_nigtt;
+	global silent_mode_at_night;
 	if settings_list["wishlist"]:
 		func_list.append("wishlist")
 	if settings_list["search_list"]:
@@ -68,7 +68,7 @@ def get_func_list():
 	if settings_list["debug_mode"]:
 		debug_mode=1
 	threshold=settings_list["threshold"]
-	silent_mode_at_nigtt = settings_list["silent_mode_at_nigtt"]
+	silent_mode_at_night = settings_list["silent_mode_at_night"]
 
 
 def get_requests(cookie, req_type):
@@ -350,7 +350,7 @@ def do_beep(reason):
 	"""do beep with PC speacker. Work only on Linux and requrement motherboard speaker"""
 	if not need_beep:
 		return 0
-	if (datetime.datetime.now().time().hour<9 or datetime.datetime.now().time().hour>22) and silent_mode_at_nigtt and (platform.system()=="Linux" or platform.system()=="FreeBSD"):
+	if (datetime.datetime.now().time().hour<9 or datetime.datetime.now().time().hour>22) and silent_mode_at_night and (platform.system()=="Linux" or platform.system()=="FreeBSD"):
 		debug_messages("Not beep, because too late")
 		return 0
 	if  platform.system()=="Linux" or platform.system()=="FreeBSD":
@@ -394,7 +394,7 @@ sc_need=0; sc_points=0
 need_giveaways_from_banners=0
 need_send_notify=0; threshold=0;
 need_beep=0; debug_mode=0
-silent_mode_at_nigtt=0
+silent_mode_at_night=0
 check_new_version(version)
 chose=0
 random.seed(os.urandom)

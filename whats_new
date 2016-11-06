@@ -6,3 +6,5 @@ What's new:
   -- fixed bug when scripts do not work when there are not entered giveaways (thanks for grray for found the bug)
   -- adding switching beep sound
   -- adding switching notify
+  -- adding nigh silent mode (on\off beep at night)
+  -- adding coins sleep threshold

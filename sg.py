@@ -350,7 +350,7 @@ def do_beep(reason):
 	"""do beep with PC speacker. Work only on Linux and requrement motherboard speaker"""
 	if not need_beep:
 		return 0
-	if (datetime.datetime.now().time().hour<9 or datetime.datetime.now().time().hour>22) and silent_mode_at_night and (platform.system()=="Linux" or platform.system()=="FreeBSD"):
+	if (datetime.datetime.now().time().hour<9 or datetime.datetime.now().time().hour>22) and silent_mode_at_night:
 		debug_messages("Not beep, because too late")
 		return 0
 	if  platform.system()=="Linux" or platform.system()=="FreeBSD":

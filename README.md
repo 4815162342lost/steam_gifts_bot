@@ -3,6 +3,7 @@ The program is written in Python 3.
 
 ####Description
 Bot for http://www.steamgifts.com/
+
 Program feauters:
   1. Automatic enter to giveaways
   2. Notify about all actions

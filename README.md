@@ -4,7 +4,7 @@ The program is written in Python 3.
 ####Description
 Bot for http://www.steamgifts.com/
 
-Program feauters:
+Program features:
   1. Automatic enter to giveaways
   2. Notify about all actions
   3. Full autonomous work without human intervention
@@ -14,7 +14,8 @@ The bot can join to giveaways with certain criteria:
   1. Your wishlist
   2. Search list
   3. Random giveaways
-  You can change criteria in settings!
+
+You can change criteria in settings!
   
 Enjoy and have fun!
 

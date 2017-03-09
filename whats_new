@@ -1,10 +1,4 @@
-Version 1.2.9 avaliable now!
+Version 1.3.0 avaliable now!
 PLEASE, download new settings.txt file and repleca old file
 What's new:
-  -- removing junk messages from console and adding debug mode
-  -- now you do not need change the directory in script (thanks for grray)
-  -- fixed bug when scripts do not work when there are not entered giveaways (thanks for grray for found the bug)
-  -- adding switching beep sound
-  -- adding switching notify
-  -- adding nigh silent mode (on\off beep at night)
-  -- adding coins sleep threshold
+  --steamcompanion.com bot has been removed, because site is down about 6 month.

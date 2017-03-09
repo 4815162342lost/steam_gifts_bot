@@ -8,7 +8,7 @@ import json
 import platform
 import re
 
-version="1.2.9"
+version="1.3.0"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 if platform.system()=="Linux":
 	import notify2
@@ -47,7 +47,7 @@ def get_user_agent():
 
 def get_func_list():
 	"""Set necessary parameters (what type of the giveaways, need beep or not, debug mode or not, need notify or not)"""
-	global sc_need; global need_giveaways_from_banners
+	global need_giveaways_from_banners
 	global need_send_notify; global need_beep
 	global debug_mode; global threshold
 	global silent_mode_at_night;
@@ -57,8 +57,6 @@ def get_func_list():
 		func_list.append("search")
 	if settings_list["random_list"]:
 		func_list.append("someone")
-	if settings_list["steam_companion_bot"]:
-		sc_need=1
 	if settings_list["giveaways_from_banners"]:
 		need_giveaways_from_banners=1
 	if settings_list["send_notify"]:
@@ -363,23 +361,6 @@ def do_beep(reason):
 		elif reason=="bad_words":
 			call(["beep", "-l 300", "-r 30", "-f 1900" ])
 
-def steam_companion():
-	global sc_points
-	global sc_need
-	try:
-		r = requests.get("https://steamcompanion.com/", cookies=sc_cookie, headers=headers)
-		soup = BeautifulSoup(r.text, "html.parser")
-		soup = soup.find(class_="points").string
-	except:
-		set_notify("Steamcompanion:", "site not available...")
-		print("Steamcompanion not available...")
-		return 0	
-	if sc_points==soup:
-		sc_need=0
-	else:
-		sc_points=soup
-		set_notify("Bot of Steam companion reports:", "Amount of coinsт: "+str(soup))
-
 def get_games_from_banners():
 	soup=BeautifulSoup(requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers).text, "html.parser")
 	banners=soup.find(class_="pinned-giveaways__inner-wrap pinned-giveaways__inner-wrap--minimized").find_all(class_="giveaway__heading__name")
@@ -389,8 +370,8 @@ def get_games_from_banners():
 			debug_messages("You will never win the game " + str(games.get("href")) + ", because you have refused to enter giveaways from banner..")
 
 print("I am started...\nHave a nice day!")
+time.sleep(60)
 func_list=[]
-sc_need=0; sc_points=0
 need_giveaways_from_banners=0
 need_send_notify=0; threshold=0;
 need_beep=0; debug_mode=0
@@ -400,7 +381,6 @@ chose=0
 random.seed(os.urandom)
 headers = json.loads(get_user_agent())
 cookie=get_from_file("cookie.txt")
-sc_cookie=get_from_file("steam_companion_cookies.txt")
 
 try:
 	r=requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
@@ -440,8 +420,6 @@ while True:
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("Coins too low...", "Or rather: "+coins+". Deep sleep for "+str(sleep_time//60)+" min.")
 		print("Coins too low: "+ str(coins)+". Deep sleep for "+str(sleep_time//60)+" min.")
-		if sc_need:
-			steam_companion()
 		time.sleep(sleep_time)
 		chose=0
 	if chose==len(func_list):
@@ -450,7 +428,5 @@ while True:
 		coins=get_coins(get_requests(cookie, "coins_check"))
 		set_notify("I entered to all giveaways...", "Coins left: "+ str(coins)+". I go to sleep for "+str(sleep_time//60)+" min.")
 		print("Coins left: "+ str(coins)+". I go to sleep for "+str(sleep_time//60)+" min.")
-		if sc_need:
-			steam_companion()
 		time.sleep(sleep_time)
 		chose=0

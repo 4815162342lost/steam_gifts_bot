@@ -51,6 +51,8 @@ def get_func_list():
 	global need_send_notify; global need_beep
 	global debug_mode; global threshold
 	global silent_mode_at_night;
+	if settings_list["group"]:
+		func_list.append("group")
 	if settings_list["wishlist"]:
 		func_list.append("wishlist")
 	if settings_list["search_list"]:
@@ -72,6 +74,21 @@ def get_func_list():
 def get_requests(cookie, req_type):
 	"""get first page"""
 	global chose
+	if req_type=="group":
+		print("Working with group...")
+		page_number=1
+                need_next=True
+                while need_next:
+                        try:
+                                r=requests.get("https://www.steamgifts.com/giveaways/search?page="+str(page_number)+"&type=group", cookies=cookie, headers=headers)
+                                get_game_links(r)
+                                need_next = get_next_page(r)
+                                page_number += 1
+                        except:
+                                print("Site not avaliable")
+                                time.sleep(300)
+                                chose=0
+                                break
 	if req_type=="wishlist":
 		print("Working with wishlist...")
 		page_number=1

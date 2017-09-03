@@ -1,4 +1,5 @@
 giveaways_from_banners=1
+group=1
 wishlist=1
 search_list=1
 random_list=1

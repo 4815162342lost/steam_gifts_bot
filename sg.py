@@ -466,8 +466,8 @@ if not need_giveaways_from_banners:
 print("Total coins:", get_coins(get_requests(cookie, "coins_check")))
 
 while True:
-    if not need_giveaways_from_banners:
-        get_games_from_banners()
+#    if not need_giveaways_from_banners:
+#        get_games_from_banners()
     i_want_to_sleep = False
     requests_result = get_requests(cookie, func_list[chose])
     chose += 1

@@ -461,8 +461,8 @@ i_want_to_sleep = False
 forbidden_words = (" ban", " fake", " bot", " not enter", " don't enter")
 good_words = (" bank", " banan", " both", " band", " banner", " bang")
 giveaways_from_banner = []
-if not need_giveaways_from_banners:
-    get_games_from_banners()
+#if not need_giveaways_from_banners:
+#    get_games_from_banners()
 print("Total coins:", get_coins(get_requests(cookie, "coins_check")))
 
 while True:

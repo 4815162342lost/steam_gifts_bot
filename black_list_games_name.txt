@@ -1,2 +1,2 @@
-game1="Saints Row: The Third - The Full Package"
-game2="Trainz Simulator DLC: Aerotrain"
+Saints Row: The Third - The Full Package
+Trainz Simulator DLC: Aerotrain

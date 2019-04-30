@@ -1,10 +1,6 @@
-priority0="Rise of the Tomb Raider"
-priority1="Just Cause™ 3"
-priority2="Hook"
-priority3="Prototype"
-priority4="Counter-Strike"
-priority5="Yosumin!"
-priority6="H1Z1"
-priority7="Cook, Serve, Delicious!"
-priority8="Foosball: World Tour"
-priority9="Colin McRae Rally"
+Just Cause™ 3
+Prototype
+Yosumin!
+Cook, Serve, Delicious!
+Foosball: World Tour
+Colin McRae Rally

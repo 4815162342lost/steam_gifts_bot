@@ -16,3 +16,4 @@ What new:
 -- move configs (user-agent, confs, cookies) to one singe settings.cfg file
 -- cnage syntaxis of the bad_giveaways_link.txt, black_list_games_name.txt, search.txt files
 -- fix bug "Fix - script crashes if there is no pinned giveaways" (https://github.com/4815162342lost/steam_gifts_bot/pull/8)
+-- deb-package is available!! Not need to install python-library and clone git-repo anymore!!! This is my first deb-package! Also script will be run as systemd-service!!!

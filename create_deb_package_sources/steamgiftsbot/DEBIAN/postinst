@@ -1,0 +1,7 @@
+#!/bin/bash
+chmod 777 /opt/steam_gifts/bad_giveaways_link.txt
+chmod 777 /opt/steam_gifts/won.txt
+chmod 755 /opt/steam_gifts/win.sh
+chmod 755 /opt/steam_gifts/sg.py
+systemctl daemon-reload
+systemctl start steam_gifts.service

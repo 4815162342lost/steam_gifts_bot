@@ -1,0 +1,22 @@
+[Unit]
+Description=Bot for https://www.steamgifts.com/ website
+Documentation=https://github.com/4815162342lost/steam_gifts_bot/wiki
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/steam_gifts/sg.py
+ExecStop=/usr/bin/killall sg.py
+RestartSec=15s
+Restart=on-failure
+DynamicUser=true
+User=sg
+Group=sg
+ReadWritePaths=/opt/steam_gifts/
+StandardOutput=journal
+StandardError=journal
+Environment="PYTHONUNBUFFERED=on"
+Environment="DISPLAY=:1"
+
+[Install]
+WantedBy=multi-user.target

@@ -32,7 +32,7 @@ Read https://github.com/4815162342lost/steam_gifts_bot/wiki for more info and in
 **A:** no, i forget update mentioned file sometimes and all was OK  
 
 **Q:** how to start?  
-**A:** read instruction: https://github.com/4815162342lost/steam_gifts_bot/wiki/How-to-start  
+**A:** read instruction: https://github.com/4815162342lost/steam_gifts_bot/wiki/
 
 **Q:** why so hard? I want to click to exe file and all! Where is exe file?!
 **A:** my main platform is Linux, I do not want to work with Windows, sorry. But my friend tested script on Windows and all was fine. please, use wiki or open issue if you need any help.

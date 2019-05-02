@@ -12,19 +12,17 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.0"
+version = "1.4.2"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-if platform.system() == "Linux":
-    import notify2
-    import gi
-    gi.require_version('GdkPixbuf', '2.0')
-    from gi.repository.GdkPixbuf import Pixbuf
-    pb = Pixbuf.new_from_file("icon.png")
-
-elif platform.system() == "Windows":
-    os.system("Chcp 65001")
 
 random.seed(os.urandom)
+
+#determine was script installed by apt-package or was clonned via git clone
+if os.path.exists('./settings.cfg'):
+    additional_path_for_conf = ""
+else:
+    additional_path_for_conf = "/etc/steam_gifts/"
+
 
 def check_new_version(ver):
     """Function for check new version of this script"""
@@ -45,7 +43,7 @@ def get_settings():
     """Function for read settings from settings.cfg file"""
     conf = configparser.ConfigParser()
     conf.optionxform=str
-    conf.read('settings.cfg')
+    conf.read(additional_path_for_conf + 'settings.cfg')
     return conf
 
 
@@ -153,7 +151,7 @@ def enter_geaway(geaway_link):
     except:
         print("Site is not available...")
         time.sleep(300)
-        return True
+        return False
     soup_enter = BeautifulSoup(r.text, "html.parser")
     for bad_word in forbidden_words:
         bad_counter += len(re.findall(bad_word, r.text, flags=re.IGNORECASE))
@@ -189,7 +187,7 @@ def enter_geaway(geaway_link):
         except:
             print("Site is not available...")
             time.sleep(300)
-            return True
+            return False
         if extract_coins["type"] == "success":
             coins = extract_coins["points"]
             set_notify("Bot entered to giveaway with game: ", re.sub("&", '', game) + f". Coins left: {coins}", separator="")
@@ -218,8 +216,6 @@ def enter_geaway(geaway_link):
                 return False
             else:
                 set_notify("Critical error!", f"Link: {link}", separator="")
-                with open("errors.txt", "a") as error:
-                    error.write(link + "\n")
                 do_beep("critical")
                 return False
         return False
@@ -264,11 +260,12 @@ def get_next_page(requests):
     """Does next page exist?"""
     if requests.text.find("Next") != -1:
         return True
-    return False
+    else:
+        return False
 
 
 def set_notify(head, text, separator="\n"):
-    """Set notify only on Linux. of non-Linux or you do want to receive notification just print"""
+    """Set notify only on Linux. If non-Linux or you do want to receive notification just print it to console"""
     print(head, text, sep=separator)
     if need_send_notify and platform.system() == "Linux":
         try:
@@ -277,8 +274,8 @@ def set_notify(head, text, separator="\n"):
             n.set_timeout(15000)
             n.set_icon_from_pixbuf(pb)
             n.show()
-        except:
-            pass
+        except Exception as e:
+            print(f"Can not send the notification: {e}")
 
 
 def work_with_win_file(need_write, count):
@@ -290,7 +287,6 @@ def work_with_win_file(need_write, count):
         else:
             read_from_file.seek(0)
             read_from_file.write(str(count))
-
 
 def check_won(count):
     """Check new won giveaway"""
@@ -368,6 +364,19 @@ for current_temporary_tuple in temporary_tuple:
     if int(settings['settings'][current_temporary_tuple]):
         func_list.append(current_temporary_tuple)
 
+if platform.system() == "Linux" and need_send_notify:
+    try:
+        import notify2
+        import gi
+        gi.require_version('GdkPixbuf', '2.0')
+        from gi.repository.GdkPixbuf import Pixbuf
+        pb = Pixbuf.new_from_file("icon.png")
+    except Exception as e:
+        print(f'Can not initialize variables for send notification due to exceprtion: {e}')
+elif platform.system() == "Windows":
+    os.system("Chcp 65001")
+
+
 #test cookies
 try:
     r = requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
@@ -377,8 +386,8 @@ except:
     sys.exit(1)
 
 #read various variables from files
-with open("search.txt") as f: what_search = f.read().splitlines()
-with open("black_list_games_name.txt") as f: bad_games_name = f.read().splitlines()
+with open(additional_path_for_conf + "search.txt") as f: what_search = f.read().splitlines()
+with open(additional_path_for_conf + "black_list_games_name.txt") as f: bad_games_name = f.read().splitlines()
 with open("bad_giveaways_link.txt") as f: bad_giveaways_link = f.read().splitlines()
 
 #sleep and get currnt count of coins

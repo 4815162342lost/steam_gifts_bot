@@ -12,11 +12,12 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.0"
+version = "1.4.2"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 random.seed(os.urandom)
 
+#determine was script installed by apt-package or was clonned via git clone
 if os.path.exists('./settings.cfg'):
     additional_path_for_conf = ""
 else:
@@ -259,7 +260,8 @@ def get_next_page(requests):
     """Does next page exist?"""
     if requests.text.find("Next") != -1:
         return True
-    return False
+    else:
+        return False
 
 
 def set_notify(head, text, separator="\n"):

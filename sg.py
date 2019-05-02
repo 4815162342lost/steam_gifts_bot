@@ -91,15 +91,13 @@ def get_requests(cookie, req_type, headers):
                     elif get_link.find(class_="table__column__deleted") != None:
                         continue
                     else:
-                        break
+                        return entered_list
                 page_number += 1
                 time.sleep(random.randint(3, 7))
             except Exception as e:
                 print(f"Can not get entered list due to exception: {e}")
                 time.sleep(300)
-                break
-        print("return entered list...")
-        return entered_list
+                return entered_list
 
 
 def get_game_links(requests_result):

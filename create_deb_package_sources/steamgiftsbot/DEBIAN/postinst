@@ -5,3 +5,5 @@ chmod 755 /opt/steam_gifts/win.sh
 chmod 755 /opt/steam_gifts/sg.py
 systemctl daemon-reload
 systemctl start steam_gifts.service
+sleep 7
+systemctl restart steam_gifts.service

@@ -12,7 +12,7 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.2"
+version = "1.4.3"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 random.seed(os.urandom)
@@ -47,77 +47,60 @@ def get_settings():
     return conf
 
 
-def get_requests(cookie, req_type):
-    """get first page"""
-    page_number = 1
-    need_next = True
-    if req_type == "wishlist":
-        print("Working with wishlist...")
-        while need_next:
+def get_requests(cookie, req_type, headers):
+    """Main function for raise other functions"""
+    print(f"Working with {req_type} giveaways")
+    def do_requests(cookie, headers, start_link="https://www.steamgifts.com/giveaways/search?page=", end_link="", page_number = 1):
+        """Function for do get requests, decide does next page exist or not and raise next functions for enter to giveaways"""
+        while True:
             try:
-                r = requests.get(f"https://www.steamgifts.com/giveaways/search?page={page_number}&type=wishlist",cookies=cookie, headers=headers)
+                r = requests.get(f"{start_link}{page_number}{end_link}",cookies=cookie, headers=headers)
                 get_game_links(r)
-                need_next = get_next_page(r)
+                if r.text.find("Next") == -1 or type(page_number) != int:
+                    break
                 page_number += 1
-                time.sleep(random.randint(3, 7))
+                time.sleep(random.randint(3, 14))
             except:
                 print("Site is not available")
                 time.sleep(300)
                 break
+    if req_type == "wishlist" or req_type=="group":
+        do_requests(cookie, headers, end_link=f"&type={req_type}")
     elif req_type == "search_list":
-        print("Working with search list")
         for current_search in what_search:
             print(f"Search giveaways which contain: {current_search}")
-            while need_next:
-                try:
-                    r = requests.get(f"https://www.steamgifts.com/giveaways/search?page={page_number}&q={current_search}", cookies=cookie, headers=headers)
-                    get_game_links(r)
-                    need_next = get_next_page(r)
-                    page_number += 1
-                    time.sleep(random.randint(3, 7))
-                except:
-                    print("Site is not available")
-                    time.sleep(300)
-                    break
+            do_requests(cookie, headers, end_link=f"&q={current_search}")
             time.sleep(random.randint(8, 39))
-    elif req_type == "group":
-        print("Working with group...")
-        while need_next:
-            try:
-                r = requests.get(f"https://www.steamgifts.com/giveaways/search?page={page_number}&type=group",cookies=cookie, headers=headers)
-                get_game_links(r)
-                need_next = get_next_page(r)
-                page_number += 1
-                time.sleep(random.randint(3, 7))
-            except:
-                print("Site is not available")
-                time.sleep(300)
-                break
+    elif req_type == "random_list" and get_coins() > threshold:
+        time.sleep(random.randint(5, 11))
+        do_requests(cookie, headers, start_link="https://www.steamgifts.com/", page_number="")
     elif req_type == "enteredlist":
         print("Trying to receive already entered giveaways...")
         entered_list = []
         page_number = 1
-        while nedd_next_page_for_entered_link:
+        while True:
             try:
                 r = requests.get(f"https://www.steamgifts.com/giveaways/entered/search?page={page_number}", cookies=cookie, headers=headers)
-                entered_list.extend(get_entered_links(r))
+                soup = BeautifulSoup(r.text, "html.parser")
+                links = soup.find_all(class_="table__row-inner-wrap")
+                for get_link in links:
+                    url = get_link.find(class_="table__column__heading").get("href")
+                    check_geaways_end = get_link.find(class_="table__remove-default is-clickable")
+                    if check_geaways_end != None:
+                        entered_list.append(url)
+                    elif get_link.find(class_="table__column__deleted") != None:
+                        continue
+                    else:
+                        break
                 page_number += 1
                 time.sleep(random.randint(3, 7))
-            except:
-                print("Site is not available")
+            except Exception as e:
+                print(f"Can not get entered list due to exception: {e}")
                 time.sleep(300)
                 break
         print("return entered list...")
         return entered_list
-    elif req_type == "random_list" and get_coins() > threshold:
-        print("Working with random giveaways...")
-        time.sleep(random.randint(5, 11))
-        try:
-            r = requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers)
-            get_game_links(r)
-        except:
-            print("Site is not available")
-            time.sleep(300)
+
 
 def get_game_links(requests_result):
     """call enter_geaways and extract link"""
@@ -125,7 +108,7 @@ def get_game_links(requests_result):
     link = soup.find_all(class_="giveaway__heading__name")
     for get_link in link:
         geaway_link = get_link.get("href")
-        if not geaway_link in entered_url:
+        if geaway_link not in entered_url:
             if not need_giveaways_from_banners and geaway_link in giveaways_from_banner:
                 continue
             entered_url.append(geaway_link)
@@ -176,7 +159,7 @@ def enter_geaway(geaway_link):
     try:
         link = soup_enter.find(class_="sidebar sidebar--wide").form
     except Exception as e:
-        print("Unknown error: {e}")
+        print(f"Unknown error: {e}")
         return False
     if link != None:
         link = link.find_all("input")
@@ -221,29 +204,6 @@ def enter_geaway(geaway_link):
         return False
 
 
-def get_entered_links(requests_result):
-    """Return entered giveaway's list. ignore these giveaways in the future!"""
-    global nedd_next_page_for_entered_link
-    entered_list = []
-    try:
-        soup = BeautifulSoup(requests_result.text, "html.parser")
-        links = soup.find_all(class_="table__row-inner-wrap")
-    except:
-        print("Can not parse a page with entered giveaways")
-        return entered_list
-    for get_link in links:
-        url = get_link.find(class_="table__column__heading").get("href")
-        check_geaways_end = get_link.find(class_="table__remove-default is-clickable")
-        if check_geaways_end != None:
-            entered_list.append(url)
-        elif get_link.find(class_="table__column__deleted") != None:
-            continue
-        else:
-            nedd_next_page_for_entered_link = False
-            return entered_list
-    return entered_list
-
-
 def get_coins():
     """How many coins do we have?"""
     try:
@@ -254,14 +214,6 @@ def get_coins():
         print(f"Can not get cookies count... Exception: {e}")
         time.sleep(300)
         return 0
-
-
-def get_next_page(requests):
-    """Does next page exist?"""
-    if requests.text.find("Next") != -1:
-        return True
-    else:
-        return False
 
 
 def set_notify(head, text, separator="\n"):
@@ -394,8 +346,7 @@ with open("bad_giveaways_link.txt") as f: bad_giveaways_link = f.read().splitlin
 time.sleep(random.randint(2, 10))
 coins = get_coins()
 
-nedd_next_page_for_entered_link = True
-entered_url = get_requests(cookie, "enteredlist")
+entered_url = get_requests(cookie, "enteredlist", headers)
 # func_list=("wishlist", "search", "someone")
 won_count = work_with_win_file(False, 0)
 set_notify("Steam gifts bot has started", f"Total coins: {coins}")
@@ -409,7 +360,7 @@ while True:
         get_games_from_banners()
     i_want_to_sleep = False
     for current_func_list in func_list:
-        get_requests(cookie, current_func_list)
+        get_requests(cookie, current_func_list,headers)
         if i_want_to_sleep:
             set_notify("Coins are too low...", "", separator="")
             break

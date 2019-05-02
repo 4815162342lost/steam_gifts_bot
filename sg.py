@@ -12,7 +12,11 @@ from subprocess import call
 import datetime
 import configparser
 
+<<<<<<< HEAD
 version = "1.4.4"
+=======
+version = "1.4.3"
+>>>>>>> 91aba4349f7ecec554da3decb76489adac1b9665
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 random.seed(os.urandom)

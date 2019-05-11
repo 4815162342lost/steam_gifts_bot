@@ -15,8 +15,14 @@ The bot can join to giveaways with certain criteria:
   2. Search list
   3. Random giveaways
 
-You can change criteria in settings.  
-Read https://github.com/4815162342lost/steam_gifts_bot/wiki for more info and instruction.  
+**How to use the script?**<br>
+There are three ways:
+  1. Clone a git and start (traditional way)
+  2. Install application via apt utility (deb package)
+  3. Use docker container (modern way)
+
+Please, read follow to get full instructions:
+https://github.com/4815162342lost/steam_gifts_bot/wiki
   
 ***Enjoy and have fun!***
 
@@ -26,15 +32,16 @@ Read https://github.com/4815162342lost/steam_gifts_bot/wiki for more info and in
 **A:** Yes, but I am using this script about ~1.5 year and all OK  
 
 **Q:** How many games can I win using this script?  
-**A:** i do not know, sepend on your luck. I won ~130 games using this script during 1.5 year  
+**A:** I do not know, sepend on your luck. I won ~130 games using this script during 1.5 year You can check on "Probability of Winning Per Day" on this web-page: https://www.steamgifts.com/stats/personal/community
 
-**Q:** should I change user_agent evey time after browser update in settings.cfg file?  
-**A:** no, i forget update mentioned file sometimes and all was OK  
 
-**Q:** how to start?  
+**Q:** Should I change user_agent evey time after browser update in settings.cfg file?  
+**A:** No, i forget update mentioned file sometimes and all was OK  
+
+**Q:** How to start?  
 **A:** read instruction: https://github.com/4815162342lost/steam_gifts_bot/wiki/
 
-**Q:** why so hard? I want to click to exe file and all! Where is exe file?!
+**Q:** Why so hard? I want to click to exe file and all! Where is exe file?!
 **A:** my main platform is Linux, I do not want to work with Windows, sorry. But my friend tested script on Windows and all was fine. please, use wiki or open issue if you need any help.
 
 **Q** why deb-package is available, but rpm package is not? I want rpm-package as well!<br/>

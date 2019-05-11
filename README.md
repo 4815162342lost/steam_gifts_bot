@@ -15,7 +15,7 @@ The bot can join to giveaways with certain criteria:
   2. Search list
   3. Random giveaways
 
-**How to use the script?**
+**How to use the script?**<br>
 There are three ways:
   1. Clone a git and start (traditional way)
   2. Install application via apt utility (deb package)

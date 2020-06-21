@@ -155,7 +155,7 @@ def enter_geaway(geaway_link):
         print(f"Game from blacklist. Ignore: {game} game")
         return False
     try:
-        link = soup_enter.find(class_="sidebar sidebar--wide").form
+        link = soup_enter.find(class_="sidebar").form
     except Exception as e:
         print(f"Unknown error: {e}")
         return False

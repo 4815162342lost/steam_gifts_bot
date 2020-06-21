@@ -1,19 +1,9 @@
 Hey hey hey,
 
 We still alive! We do not die!
-Version 1.4.0 is available now!
+Version 1.4.5 is available now!
 
-Please, remove settings.txt, user_agent.txt and cookie.txt files. They are not needed anymore!!!
-Use and edit settings.cfg instead. This is important!!!
-
-Also, please, recreate bad_giveaways_link.txt, black_list_games_name.txt, search.txt files. Syntaxis has been changed.
-This is also important!!!
-
-Now you need python 3.6 or higher to run the script. Because we are using f-straings. Do not update the script if you do not able to use python 3.6!
 
 What new:
--- major code improvement! Now code looks better!
--- move configs (user-agent, confs, cookies) to one singe settings.cfg file
--- cnage syntaxis of the bad_giveaways_link.txt, black_list_games_name.txt, search.txt files
--- fix bug "Fix - script crashes if there is no pinned giveaways" (https://github.com/4815162342lost/steam_gifts_bot/pull/8)
--- deb-package is available!! Not need to install python-library and clone git-repo anymore!!! This is my first deb-package! Also script will be run as systemd-service!!!
+-- Steamgift site changed! And fixed "Unknown error: 'NoneType' object has no attribute 'form'" error.
+Thanks to Yrok472 for report (https://github.com/4815162342lost/steam_gifts_bot/issues/12)

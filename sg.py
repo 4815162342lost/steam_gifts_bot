@@ -12,7 +12,7 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.4"
+version = "1.4.5"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 random.seed(os.urandom)

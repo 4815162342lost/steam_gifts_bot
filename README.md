@@ -29,10 +29,10 @@ https://github.com/4815162342lost/steam_gifts_bot/wiki
 #### FAQ
 
 **Q:** Can steamgift site block my account?  
-**A:** Yes, but I am using this script about ~1.5 year and all OK  
+**A:** Yes, but I am using this script about ~5 year and all OK  
 
 **Q:** How many games can I win using this script?  
-**A:** I do not know, sepend on your luck. I won ~130 games using this script during 1.5 year You can check on "Probability of Winning Per Day" on this web-page: https://www.steamgifts.com/stats/personal/community
+**A:** I do not know, sepend on your luck. I won ~257 games using this script. You can check on "Probability of Winning Per Day" on this web-page: https://www.steamgifts.com/stats/personal/community
 
 
 **Q:** Should I change user_agent evey time after browser update in settings.cfg file?  

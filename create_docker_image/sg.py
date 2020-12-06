@@ -11,6 +11,7 @@ import sys
 from subprocess import call
 import datetime
 import configparser
+import zipfile
 
 version = "1.4.5"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -22,8 +23,12 @@ if os.path.exists('./settings.cfg'):
     additional_path_for_conf = ""
 else:
     additional_path_for_conf = "/etc/steam_gifts/"
-
-
+    
+if not os.path.exists('/etc/steam_gifts/settings.cfg'):
+    zip_files_for_unpack = zipfile.ZipFile('./files_for_unpack.zip', 'r')
+    zip_files_for_unpack.extractall('/etc/steam_gifts/')
+    zip_files_for_unpack.close()
+    
 def check_new_version(ver):
     """Function for check new version of this script"""
     try:

@@ -11,9 +11,8 @@ import sys
 from subprocess import call
 import datetime
 import configparser
-import zipfile
 
-version = "1.4.4"
+version = "1.4.5"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 random.seed(os.urandom)
@@ -24,10 +23,6 @@ if os.path.exists('./settings.cfg'):
 else:
     additional_path_for_conf = "/etc/steam_gifts/"
 
-if not os.path.exists('/etc/steam_gifts/settings.cfg'):
-    zip_files_for_unpack = zipfile.ZipFile('./files_for_unpack.zip', 'r')
-    zip_files_for_unpack.extractall('/etc/steam_gifts/')
-    zip_files_for_unpack.close()
 
 def check_new_version(ver):
     """Function for check new version of this script"""
@@ -160,7 +155,7 @@ def enter_geaway(geaway_link):
         print(f"Game from blacklist. Ignore: {game} game")
         return False
     try:
-        link = soup_enter.find(class_="sidebar sidebar--wide").form
+        link = soup_enter.find(class_="sidebar").form
     except Exception as e:
         print(f"Unknown error: {e}")
         return False

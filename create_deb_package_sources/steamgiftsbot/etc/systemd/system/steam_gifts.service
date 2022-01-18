@@ -6,7 +6,8 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=/opt/steam_gifts/sg.py
-ExecStop=/usr/bin/killall sg.py
+KillMode=process
+KillSignal=SIGINT
 RestartSec=15s
 Restart=on-failure
 DynamicUser=true

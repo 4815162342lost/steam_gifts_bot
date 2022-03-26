@@ -15,8 +15,6 @@ import configparser
 version = "1.4.5"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-random.seed(os.urandom)
-
 #determine was script installed by apt-package or was clonned via git clone
 if os.path.exists('./settings.cfg'):
     additional_path_for_conf = ""
@@ -27,14 +25,14 @@ else:
 def check_new_version(ver):
     """Function for check new version of this script"""
     try:
-        if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version").text.rstrip() == ver:
+        if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version", timeout=120).text.rstrip() == ver:
             print(f"You are using the latest version of the program. Your version: {ver}")
         else:
             print(
                 "New version is avaliable!\nPlease, visit https://github.com/4815162342lost/steam_gifts_bot and install new version")
             print("What's new:")
             print(
-                requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new").text)
+                requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new", timeout=120).text)
     except:
         print("Can not check new version. Github is not available or internet connection is not working!")
 
@@ -54,7 +52,7 @@ def get_requests(cookie, req_type, headers):
         """Function for do get requests, decide does next page exist or not and raise next functions for enter to giveaways"""
         while True:
             try:
-                r = requests.get(f"{start_link}{page_number}{end_link}",cookies=cookie, headers=headers)
+                r = requests.get(f"{start_link}{page_number}{end_link}",cookies=cookie, headers=headers, timeout=120)
                 get_game_links(r)
                 if r.text.find("Next") == -1 or type(page_number) != int:
                     break
@@ -80,7 +78,7 @@ def get_requests(cookie, req_type, headers):
         page_number = 1
         while True:
             try:
-                r = requests.get(f"https://www.steamgifts.com/giveaways/entered/search?page={page_number}", cookies=cookie, headers=headers)
+                r = requests.get(f"https://www.steamgifts.com/giveaways/entered/search?page={page_number}", cookies=cookie, headers=headers, timeout=120)
                 soup = BeautifulSoup(r.text, "html.parser")
                 links = soup.find_all(class_="table__row-inner-wrap")
                 for get_link in links:
@@ -124,7 +122,7 @@ def enter_geaway(geaway_link):
     global i_want_to_sleep
     bad_counter = good_counter = 0
     try:
-        r = requests.get(geaway_link, cookies=cookie, headers=headers)
+        r = requests.get(geaway_link, cookies=cookie, headers=headers, timeout=120)
         if r.status_code != 200:
             set_notify("Site error", f"Error code: {r.status_code}", separator=". ")
             time.sleep(300)
@@ -163,7 +161,7 @@ def enter_geaway(geaway_link):
         link = link.find_all("input")
         params = {"xsrf_token": link[0].get("value"), "do": "entry_insert", "code": link[2].get("value")}
         try:
-            r = requests.post("https://www.steamgifts.com/ajax.php", data=params, cookies=cookie, headers=headers)
+            r = requests.post("https://www.steamgifts.com/ajax.php", data=params, cookies=cookie, headers=headers, timeout=120)
             extract_coins = json.loads(r.text)
         except:
             print("Site is not available...")
@@ -205,7 +203,7 @@ def enter_geaway(geaway_link):
 def get_coins():
     """How many coins do we have?"""
     try:
-        soup = BeautifulSoup(requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers).text, "html.parser")
+        soup = BeautifulSoup(requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers, timeout=120).text, "html.parser")
         coins = int(soup.find(class_="nav__points").string)
         return coins
     except Exception as e:
@@ -241,7 +239,7 @@ def work_with_win_file(need_write, count):
 def check_won(count):
     """Check new won giveaway"""
     try:
-        r = requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+        r = requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers, timeout=120)
         soup = BeautifulSoup(r.text, "html.parser").find(class_="nav__right-container").find_all("a")[1].find(
             class_="nav__notification").string
     except:
@@ -279,7 +277,7 @@ def do_beep(reason):
 
 def get_games_from_banners():
     try:
-        soup = BeautifulSoup(requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers).text,
+        soup = BeautifulSoup(requests.get("https://www.steamgifts.com/", cookies=cookie, headers=headers, timeout=120).text,
                              "html.parser")
         banners = soup.find(class_="pinned-giveaways__inner-wrap pinned-giveaways__inner-wrap--minimized").find_all(
             class_="giveaway__heading__name")
@@ -329,7 +327,7 @@ elif platform.system() == "Windows":
 
 #test cookies
 try:
-    r = requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers)
+    r = requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers, timeout=120)
 except:
     set_notify("Cookies expired", "Please update your cookies")
     do_beep("coockie_exept")

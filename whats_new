@@ -1,9 +1,14 @@
 Hey hey hey,
 
 We still alive! We do not die!
-Version 1.4.5 is available now!
+Version 1.4.6 is available now!
 
 
 What new:
--- Steamgift site changed! And fixed "Unknown error: 'NoneType' object has no attribute 'form'" error.
-Thanks to Yrok472 for report (https://github.com/4815162342lost/steam_gifts_bot/issues/12)
+-- added timeout to all requests,post and requests.get functions. Thanks to TheGoblinHero for report:
+https://github.com/4815162342lost/steam_gifts_bot/issues/16
+-- removed docker (sorry, i do not work with docker :()
+-- removed random.seed(os.urandom) due to deprecated:
+/opt/steam_gifts/sg.py:18: DeprecationWarning: Seeding based on hashing is deprecated
+ since Python 3.9 and will be removed in a subsequent version. The only
+supported seed types are: None, int, float, str, bytes, and bytearray.

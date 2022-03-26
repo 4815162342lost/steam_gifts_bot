@@ -9,6 +9,7 @@ Bot for http://www.steamgifts.com/
   2. Notify about all actions
   3. Full autonomous work without human intervention
   4. Free and open source
+  5. Running via systemd-service
 
 The bot can join to giveaways with certain criteria:
   1. Your wishlist
@@ -16,10 +17,9 @@ The bot can join to giveaways with certain criteria:
   3. Random giveaways
 
 **How to use the script?**<br>
-There are three ways:
+There are two ways:
   1. Clone a git and start (traditional way)
-  2. Install application via apt utility (deb package)
-  3. Use docker container (modern way)
+  2. Install application via apt utility (deb package, only for Ubuntu or Debian)
 
 Please, read follow to get full instructions:
 https://github.com/4815162342lost/steam_gifts_bot/wiki
@@ -29,10 +29,10 @@ https://github.com/4815162342lost/steam_gifts_bot/wiki
 #### FAQ
 
 **Q:** Can steamgift site block my account?  
-**A:** Yes, but I am using this script about ~5 year and all OK  
+**A:** Yes, but I am using this script about ~10 year and all OK  
 
 **Q:** How many games can I win using this script?  
-**A:** I do not know, sepend on your luck. I won ~257 games using this script. You can check on "Probability of Winning Per Day" on this web-page: https://www.steamgifts.com/stats/personal/community
+**A:** I do not know, sepend on your luck. I won ~320 games using this script. You can check on "Probability of Winning Per Day" on this web-page: https://www.steamgifts.com/stats/personal/community
 
 
 **Q:** Should I change user_agent evey time after browser update in settings.cfg file?  
@@ -42,7 +42,7 @@ https://github.com/4815162342lost/steam_gifts_bot/wiki
 **A:** read instruction: https://github.com/4815162342lost/steam_gifts_bot/wiki/
 
 **Q:** Why so hard? I want to click to exe file and all! Where is exe file?!
-**A:** my main platform is Linux, I do not want to work with Windows, sorry. But my friend tested script on Windows and all was fine. please, use wiki or open issue if you need any help.
+**A:** my main platform is Linux, I do not want to work with Windows, sorry. But my friend tested script on Windows and all was fine. please, use wiki or open issue if you need any help
 
 **Q** why deb-package is available, but rpm package is not? I want rpm-package as well!<br/>
 **A** Sorry, I am an Ubuntu fan :-).

@@ -4,7 +4,6 @@ import requests
 import random
 from bs4 import BeautifulSoup
 import os
-import json
 import platform
 import re
 import sys
@@ -58,7 +57,7 @@ def get_requests(cookie, req_type, headers):
                     break
                 page_number += 1
                 time.sleep(random.randint(3, 14))
-            except:
+            except Exception as e:
                 print("Site is not available")
                 time.sleep(300)
                 break
@@ -162,7 +161,7 @@ def enter_geaway(geaway_link):
         params = {"xsrf_token": link[0].get("value"), "do": "entry_insert", "code": link[2].get("value")}
         try:
             r = requests.post("https://www.steamgifts.com/ajax.php", data=params, cookies=cookie, headers=headers, timeout=120)
-            extract_coins = json.loads(r.text)
+            extract_coins = r.json()
         except:
             print("Site is not available...")
             time.sleep(300)

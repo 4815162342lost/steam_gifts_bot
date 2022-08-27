@@ -25,15 +25,15 @@ def check_new_version(ver):
     """Function for check new version of this script"""
     try:
         if requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/version", timeout=120).text.rstrip() == ver:
-            print(f"You are using the latest version of the program. Your version: {ver}")
+            print(f"You are using the latest version of the script. Your version is: {ver}")
         else:
             print(
-                "New version is avaliable!\nPlease, visit https://github.com/4815162342lost/steam_gifts_bot and install new version")
+                "New version is avaliable!\nPlease, visit https://github.com/4815162342lost/steam_gifts_bot and install the new version")
             print("What's new:")
             print(
                 requests.get("https://raw.githubusercontent.com/4815162342lost/steam_gifts_bot/master/whats_new", timeout=120).text)
     except:
-        print("Can not check new version. Github is not available or internet connection is not working!")
+        print("Unable to obtain new version data. Github is possibly unavailable or there is no internet connection")
 
 
 def get_settings():
@@ -58,21 +58,21 @@ def get_requests(cookie, req_type, headers):
                 page_number += 1
                 time.sleep(random.randint(3, 14))
             except Exception as e:
-                print("Site is not available")
+                print("The website is not available")
                 time.sleep(300)
                 break
     if req_type == "wishlist" or req_type=="group":
         do_requests(cookie, headers, end_link=f"&type={req_type}")
     elif req_type == "search_list":
         for current_search in what_search:
-            print(f"Search giveaways which contain: {current_search}")
+            print(f"Searching giveaways that contain: {current_search}")
             do_requests(cookie, headers, end_link=f"&q={current_search}")
             time.sleep(random.randint(8, 39))
     elif req_type == "random_list" and get_coins() > threshold:
         time.sleep(random.randint(5, 11))
         do_requests(cookie, headers, start_link="https://www.steamgifts.com/", page_number="")
     elif req_type == "enteredlist":
-        print("Trying to receive already entered giveaways...")
+        print("Trying to receive entered giveaways...")
         entered_list = []
         page_number = 1
         while True:
@@ -113,7 +113,7 @@ def get_game_links(requests_result):
                 if enter_geaway(geaway_link):
                     break
             else:
-                print(f"Giveaway url on black list: {geaway_link[geaway_link.rfind('/') + 1:]}")
+                print(f"Giveaway URL is in the blacklist: {geaway_link[geaway_link.rfind('/') + 1:]}")
 
 
 def enter_geaway(geaway_link):
@@ -127,7 +127,7 @@ def enter_geaway(geaway_link):
             time.sleep(300)
             return False
     except:
-        print("Site is not available...")
+        print("The website is not available")
         time.sleep(300)
         return False
     soup_enter = BeautifulSoup(r.text, "html.parser")
@@ -137,7 +137,7 @@ def enter_geaway(geaway_link):
         for good_word in good_words:
             good_counter += len(re.findall(good_word, r.text, flags=re.IGNORECASE))
         if bad_counter > good_counter:
-            print("It is a trap! Be carefully! Bad people want destroy my script!")
+            print("It's a trap! Be careful! Some bad people want to destroy my script!")
             do_beep("bad_words")
             with open("bad_giveaways.txt", "a") as bad_giveaways:
                 bad_giveaways.write(geaway_link + "\n")
@@ -149,7 +149,7 @@ def enter_geaway(geaway_link):
     except:
         game = "Unknown game"
     if game in bad_games_name:
-        print(f"Game from blacklist. Ignore: {game} game")
+        print(f"Game is from the blacklist. Ignoring: {game} game")
         return False
     try:
         link = soup_enter.find(class_="sidebar").form
@@ -189,7 +189,7 @@ def enter_geaway(geaway_link):
         else:
             link = soup_enter.select("div.featured__column span")
             if link != None:
-                print(f"Giveaway was ended. Bot has late to enter giveaway: {geaway_link}. Was ended: {link[0].text}")
+                print(f"The giveaway is over. Bot was unable to enter in time: {geaway_link}. Ended: {link[0].text}")
                 time.sleep(random.randint(5, 60))
                 return False
             else:
@@ -206,7 +206,7 @@ def get_coins():
         coins = int(soup.find(class_="nav__points").string)
         return coins
     except Exception as e:
-        print(f"Can not get cookies count... Exception: {e}")
+        print(f"Unable to retrieve cookies count... Exception: {e}")
         time.sleep(300)
         return 0
 
@@ -242,12 +242,12 @@ def check_won(count):
         soup = BeautifulSoup(r.text, "html.parser").find(class_="nav__right-container").find_all("a")[1].find(
             class_="nav__notification").string
     except:
-        print("You did not win giveaways... But do not worry. Will luck next time!")
+        print("You didn't win a single giveaway. Better luck next time!")
         work_with_win_file(True, 0)
         return 0
     if int(count) < int(soup):
         do_beep("won")
-        set_notify("Congratulations! You won!", "Take your prize on website", separator=" ")
+        set_notify("Congratulations! You won!", "Get your prize on the website", separator=" ")
         work_with_win_file(True, soup)
         return soup
     elif int(count) > int(soup):
@@ -261,7 +261,7 @@ def do_beep(reason):
     if not need_beep:
         return 0
     if (datetime.datetime.now().time().hour < 9 or datetime.datetime.now().time().hour > 22) and silent_mode_at_night:
-        print("Not beep, because night")
+        print("Not beeping, night mode is enabled")
         return 0
     if platform.system() == "Linux" or platform.system() == "FreeBSD":
         if reason == "coockie_exept":
@@ -283,12 +283,12 @@ def get_games_from_banners():
         for games in banners:
             if games not in giveaways_from_banner:
                 giveaways_from_banner.append(games.get("href"))
-                print(f"You will never win the game {games.get('href')}, because you have refused to enter giveaways from banner...")
+                print(f"You will never win the game {games.get('href')}, because you refused to participate in giveaways from the banner...")
     except Exception as e:
         print(f"Can not get games from banners...Exception: {e}")
 
 
-print("I have started...\nHave a nice day!")
+print("I'm turned on...\nHave a nice day!")
 time.sleep(60)
 func_list = []
 
@@ -319,7 +319,7 @@ if platform.system() == "Linux" and need_send_notify:
         from gi.repository.GdkPixbuf import Pixbuf
         pb = Pixbuf.new_from_file("icon.png")
     except Exception as e:
-        print(f'Can not initialize variables for send notification due to exceprtion: {e}')
+        print(f'Can not initialize variables for send notification due to exception: {e}')
 elif platform.system() == "Windows":
     os.system("Chcp 65001")
 

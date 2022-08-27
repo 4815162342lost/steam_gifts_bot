@@ -206,7 +206,7 @@ def get_coins():
         coins = int(soup.find(class_="nav__points").string)
         return coins
     except Exception as e:
-        print(f"Unable to retrieve cookies count... Exception: {e}")
+        print(f"Unable to retrieve coins count... Exception: {e}")
         time.sleep(300)
         return 0
 
@@ -289,7 +289,7 @@ def get_games_from_banners():
 
 
 print("I'm turned on...\nHave a nice day!")
-time.sleep(60)
+time.sleep(6)
 func_list = []
 
 #let's check is new version available
@@ -326,11 +326,17 @@ elif platform.system() == "Windows":
 
 #test cookies
 try:
-    r = requests.get("https://www.steamgifts.com/giveaways/search?type=wishlist", cookies=cookie, headers=headers, timeout=120)
-except:
+    r = requests.head("https://www.steamgifts.com/account/settings/profile",cookies=cookie, headers=headers, timeout=120)
+except Exception as e:
+    print("Can not check cookie... Steamgift is possibly unavailable or there is no internet connection")
+if r.status_code == 301 or r.status_code == 302:
     set_notify("Cookies expired", "Please update your cookies")
     do_beep("coockie_exept")
     sys.exit(1)
+else:
+    set_notify("Cookies is OK", "We can proceed")
+    del(r)
+
 
 #read various variables from files
 with open(additional_path_for_conf + "search.txt") as f: what_search = f.read().splitlines()

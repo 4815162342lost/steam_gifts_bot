@@ -41,7 +41,7 @@ https://github.com/4815162342lost/steam_gifts_bot/wiki
 **Q:** How to start?  
 **A:** read instruction: https://github.com/4815162342lost/steam_gifts_bot/wiki/
 
-**Q:** Why so hard? I want to click to exe file and all! Where is exe file?!
+**Q:** Why so hard? I want to click to exe file and all! Where is exe file?!  
 **A:** my main platform is Linux, I do not want to work with Windows, sorry. But my friend tested script on Windows and all was fine. please, use wiki or open issue if you need any help
 
 **Q** why deb-package is available, but rpm package is not? I want rpm-package as well!<br/>

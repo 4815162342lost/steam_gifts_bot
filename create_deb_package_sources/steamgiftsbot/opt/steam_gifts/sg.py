@@ -11,7 +11,7 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.6"
+version = "1.4.7"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 #determine was script installed by apt-package or was clonned via git clone

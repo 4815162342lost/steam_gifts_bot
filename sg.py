@@ -289,7 +289,7 @@ def get_games_from_banners():
 
 
 print("I'm turned on...\nHave a nice day!")
-time.sleep(6)
+time.sleep(60)
 func_list = []
 
 #let's check is new version available

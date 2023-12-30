@@ -11,7 +11,7 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.7"
+version = "1.4.8"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 #determine was script installed by apt-package or was clonned via git clone
@@ -80,6 +80,8 @@ def get_requests(cookie, req_type, headers):
                 r = requests.get(f"https://www.steamgifts.com/giveaways/entered/search?page={page_number}", cookies=cookie, headers=headers, timeout=120)
                 soup = BeautifulSoup(r.text, "html.parser")
                 links = soup.find_all(class_="table__row-inner-wrap")
+                if not links:
+                    return entered_list
                 for get_link in links:
                     url = get_link.find(class_="table__column__heading").get("href")
                     check_geaways_end = get_link.find(class_="table__remove-default is-clickable")

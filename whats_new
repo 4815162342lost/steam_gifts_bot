@@ -1,12 +1,9 @@
 Hey hey hey,
 
 We still alive! We do not die!
-Version 1.4.7 is available now!
+Version 1.4.8 is available now!
 
 
 What new:
 Just minor update!
--- improved print messages. Thanks to @throawaygit:
-   https://github.com/4815162342lost/steam_gifts_bot/pull/18
--- old method of coockie checcking is not available on steamgift site. New method added:
-   https://github.com/4815162342lost/steam_gifts_bot/commit/b6107b10e496633676f99cca7d7691fd3df2c6d6 
+  -- fixed hung wilr working with entered list

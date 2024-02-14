@@ -1,9 +1,11 @@
 Hey hey hey,
 
 We still alive! We do not die!
-Version 1.4.8 is available now!
+Version 1.4.9 is available now!
 
 
 What new:
-Just minor update!
-  -- fixed hung wilr working with entered list
+-- added "recommended" section with coolest giveaways:
+   https://www.steamgifts.com/giveaways/search?type=recommended
+After manual update you should add recommended=1 to /etc/steam_gifts/settings.cfg
+Or set 0 to disable

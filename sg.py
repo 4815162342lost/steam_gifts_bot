@@ -11,7 +11,7 @@ from subprocess import call
 import datetime
 import configparser
 
-version = "1.4.8"
+version = "1.4.9"
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 #determine was script installed by apt-package or was clonned via git clone
@@ -61,7 +61,7 @@ def get_requests(cookie, req_type, headers):
                 print("The website is not available")
                 time.sleep(300)
                 break
-    if req_type == "wishlist" or req_type=="group":
+    if req_type == "wishlist" or req_type=="group" or req_type=="recommended":
         do_requests(cookie, headers, end_link=f"&type={req_type}")
     elif req_type == "search_list":
         for current_search in what_search:
@@ -308,7 +308,7 @@ threshold = int(settings['settings']['threshold'])
 need_beep = int(settings['settings']['beep'])
 silent_mode_at_night = int(settings['settings']['silent_mode_at_night'])
 
-temporary_tuple = ("wishlist", "search_list", "group", "random_list")
+temporary_tuple = ("wishlist", "search_list", "recommended", "group", "random_list")
 for current_temporary_tuple in temporary_tuple:
     if int(settings['settings'][current_temporary_tuple]):
         func_list.append(current_temporary_tuple)
